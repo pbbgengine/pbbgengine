@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property string $model_type
+ * @property int $model_id
+ * @property int $item_id
+ */
 class ItemInstance extends Model
 {
     protected $fillable = [
@@ -18,6 +23,7 @@ class ItemInstance extends Model
 
     /**
      * Get the underlying item model.
+     * @return BelongsTo<Item, ItemInstance>
      */
     public function item(): BelongsTo
     {
@@ -26,6 +32,7 @@ class ItemInstance extends Model
 
     /**
      * Get the model that owns the item instance.
+     * @return MorphTo<Model, ItemInstance>
      */
     public function model(): MorphTo
     {
