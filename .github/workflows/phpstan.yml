@@ -1,0 +1,11 @@
+name: phpstan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  phpstan:
+    uses: ./.github/workflows/php.yml
+    with:
+      command: vendor/bin/phpstan analyse --error-format=github
