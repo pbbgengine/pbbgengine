@@ -1,4 +1,8 @@
 {
   "name": "pbbgengine/pbbgengine",
-  "license": "MIT"
+  "license": "MIT",
+  "require": {
+    "php": "^8.3",
+    "laravel/framework": "^11"
+  }
 }
