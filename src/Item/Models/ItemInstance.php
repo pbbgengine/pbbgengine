@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace PbbgEngine\Item\Models;
 
+use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 /**
+ * @property int $id
  * @property string $model_type
  * @property int $model_id
  * @property int $item_id
+ * @property Collection $data
+ * @property Item $item
  */
 class ItemInstance extends Model
 {
@@ -19,7 +25,21 @@ class ItemInstance extends Model
         'model_type',
         'model_id',
         'item_id',
+        'data',
     ];
+
+    protected $casts = [
+        'data' => AsCollection::class,
+    ];
+
+    /**
+     * Get the combined data from the item merged into the item instance.
+     * @return Collection<string, mixed>
+     */
+    public function getDataCombinedAttribute(): Collection
+    {
+        return $this->item->data->merge($this->data);
+    }
 
     /**
      * Get the underlying item model.
@@ -37,5 +57,15 @@ class ItemInstance extends Model
     public function model(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Filters item instances that have their own data defined.
+     *
+     * @param Builder<ItemInstance> $query
+     */
+    public function scopeUnique(Builder $query): void
+    {
+        $query->whereNotNull('data');
     }
 }

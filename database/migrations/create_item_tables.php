@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->json('data')->nullable();
             $table->timestamps();
         });
 
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->id();
             $table->morphs('model');
             $table->unsignedBigInteger('item_id');
+            $table->json('data')->nullable();
             $table->timestamps();
             $table->foreign('item_id')->references('id')->on('items');
         });
