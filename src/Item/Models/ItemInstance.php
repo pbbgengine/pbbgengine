@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
 use PbbgEngine\Item\Events\ItemInteractionEvent;
+use PbbgEngine\Item\Exceptions\DoesNotHaveInteraction;
+use PbbgEngine\Item\Exceptions\InteractionDoesNotExist;
+use PbbgEngine\Item\Exceptions\InvalidInteraction;
 use PbbgEngine\Item\Interactions\Interaction;
 
 /**
@@ -88,11 +91,11 @@ class ItemInstance extends Model
     public function interact(string $class): MessageBag
     {
         if (!class_exists($class)) {
-            throw new Exception("interaction $class does not exist");
+            throw new InteractionDoesNotExist($class);
         }
 
         if (!is_subclass_of($class, Interaction::class)) {
-            throw new Exception("class $class does not implement interaction");
+            throw new InvalidInteraction($class);
         }
 
         if ($this->item->relationLoaded('interactions')) {
@@ -102,7 +105,7 @@ class ItemInstance extends Model
         }
 
         if (!$interaction) {
-            throw new Exception("item $this->item_id does not have interaction: $class");
+            throw new DoesNotHaveInteraction($this->item, $class);
         }
 
         $handler = new $class;

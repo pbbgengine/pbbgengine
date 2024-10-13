@@ -7,6 +7,9 @@ namespace PbbgEngine\Tests\Item;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
+use PbbgEngine\Item\Exceptions\DoesNotHaveInteraction;
+use PbbgEngine\Item\Exceptions\InteractionDoesNotExist;
+use PbbgEngine\Item\Exceptions\InvalidInteraction;
 use PbbgEngine\Item\Models\Item;
 use PbbgEngine\Item\Models\ItemInstance;
 use PbbgEngine\Tests\TestCase;
@@ -92,8 +95,13 @@ class ItemTest extends TestCase
         ]);
 
         $this->assertThrows(function() use($instance) {
-            $instance->interact('invalid_interaction');
-        }, Exception::class);
+            $instance->interact('fake_interaction');
+        }, InteractionDoesNotExist::class);
+
+        // User is not an interaction
+        $this->assertThrows(function() use($instance) {
+            $instance->interact(User::class);
+        }, InvalidInteraction::class);
 
         $messages = $instance->interact(Drink::class);
         $this->assertInstanceOf(MessageBag::class, $messages);
@@ -105,5 +113,9 @@ class ItemTest extends TestCase
         $this->assertInstanceOf(MessageBag::class, $messages);
         $this->assertFalse($messages->has('errors'));
         $this->assertTrue($messages->has('success'));
+
+        $this->assertThrows(function() use($instance) {
+            $this->instance->interact(Drink::class);
+        }, DoesNotHaveInteraction::class);
     }
 }
