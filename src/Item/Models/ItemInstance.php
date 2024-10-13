@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
+use PbbgEngine\Item\Events\ItemInteractionEvent;
 use PbbgEngine\Item\Interactions\Interaction;
 
 /**
@@ -105,6 +106,10 @@ class ItemInstance extends Model
         }
 
         $handler = new $class;
-        return $handler->handle($this);
+        $messages = $handler->handle($this);
+
+        event(new ItemInteractionEvent($this, $handler, $messages));
+
+        return $messages;
     }
 }
