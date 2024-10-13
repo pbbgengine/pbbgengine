@@ -46,4 +46,15 @@ class Quest extends Model
     {
         return $this->hasManyThrough(QuestObjective::class, QuestStage::class);
     }
+
+    /**
+     * Get the transitions associated with the quest completion.
+     *
+     * @return HasMany<QuestTransition>
+     */
+    public function transitions(): HasMany
+    {
+        return $this->hasMany(QuestTransition::class, 'triggerable_id', $this->primaryKey)
+            ->where('triggerable_type', self::class);
+    }
 }

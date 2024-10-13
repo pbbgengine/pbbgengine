@@ -6,6 +6,7 @@ namespace PbbgEngine\Quest\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -26,5 +27,16 @@ class QuestObjective extends Model
     public function stage(): BelongsTo
     {
         return $this->belongsTo(QuestStage::class);
+    }
+
+    /**
+     * Get the transitions associated with the quest objective completion.
+     *
+     * @return HasMany<QuestTransition>
+     */
+    public function transitions(): HasMany
+    {
+        return $this->hasMany(QuestTransition::class, 'triggerable_id', $this->primaryKey)
+            ->where('triggerable_type', self::class);
     }
 }

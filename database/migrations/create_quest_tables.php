@@ -48,6 +48,13 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('quest_stage_id')->references('id')->on('quest_stages');
         });
+
+        Schema::create('quest_transitions', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('triggerable'); // Quest, QuestStage, QuestObjective
+            $table->morphs('actionable'); // Quest, QuestStage
+            $table->timestamps();
+        });
     }
 
     /**
@@ -55,8 +62,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('item_interactions');
-        Schema::dropIfExists('item_instances');
-        Schema::dropIfExists('items');
+        Schema::dropIfExists('quest_transitions');
+        Schema::dropIfExists('quest_objectives');
+        Schema::dropIfExists('quest_instances');
+        Schema::dropIfExists('quests');
     }
 };
