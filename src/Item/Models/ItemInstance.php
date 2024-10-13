@@ -94,7 +94,11 @@ class ItemInstance extends Model
             throw new Exception("class $class does not implement interaction");
         }
 
-        $interaction = $this->item->interactions()->where('class', $class)->first();
+        if ($this->item->relationLoaded('interactions')) {
+            $interaction = $this->item->interactions->where('class', $class)->first();
+        } else {
+            $interaction = $this->item->interactions()->where('class', $class)->first();
+        }
 
         if (!$interaction) {
             throw new Exception("item $this->item_id does not have interaction: $class");
