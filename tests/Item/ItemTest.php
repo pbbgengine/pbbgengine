@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace PbbgEngine\Tests\Item;
 
+use Exception;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\MessageBag;
 use PbbgEngine\Item\Models\Item;
 use PbbgEngine\Item\Models\ItemInstance;
 use PbbgEngine\Tests\TestCase;
+use Workbench\App\Game\Item\Interactions\Drink;
 use Workbench\App\Models\User;
 use Workbench\Database\Factories\UserFactory;
-use function PHPUnit\Framework\assertEquals;
 
 class ItemTest extends TestCase
 {
@@ -39,18 +40,8 @@ class ItemTest extends TestCase
 
     public function testItemIsCreated(): void
     {
-        $this->assertDatabaseHas('items', [
-            'id' => $this->item->id,
-            'name' => $this->item->name,
-            'data' => $this->item->data->toJson(),
-        ]);
-
-        $this->assertDatabaseHas('item_instances', [
-            'id' => $this->instance->id,
-            'model_type' => User::class,
-            'model_id' => $this->instance->model_id,
-            'data' => $this->instance->data->toJson(),
-        ]);
+        $this->assertModelExists($this->item);
+        $this->assertModelExists($this->instance);
     }
 
     public function testModelHasItemInstance(): void
@@ -83,5 +74,36 @@ class ItemTest extends TestCase
             ['a' => 'a', 'b' => 'B', 'c' => 'c', 'd' => 'd'],
             $this->instance->data_combined->toArray(),
         );
+    }
+
+    public function testCanInteractWithItem(): void
+    {
+        $item = Item::create([
+            'name' => 'Can of Cola',
+            'data' => ['empty' => false],
+        ]);
+
+        $item->interactions()->create(['class' => Drink::class]);
+
+        $instance = $item->instances()->create([
+            'model_type' => User::class,
+            'model_id' => $this->user->id,
+            'data' => ['empty' => true],
+        ]);
+
+        $this->assertThrows(function() use($instance) {
+            $instance->interact('invalid_interaction');
+        }, Exception::class);
+
+        $messages = $instance->interact(Drink::class);
+        $this->assertInstanceOf(MessageBag::class, $messages);
+        $this->assertTrue($messages->has('errors'));
+
+        $instance->data->put('empty', false);
+
+        $messages = $instance->interact(Drink::class);
+        $this->assertInstanceOf(MessageBag::class, $messages);
+        $this->assertFalse($messages->has('errors'));
+        $this->assertTrue($messages->has('success'));
     }
 }

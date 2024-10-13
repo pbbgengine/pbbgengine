@@ -15,6 +15,7 @@ trait HasItems
 {
     /**
      * Get item instances that belong to this model.
+     *
      * @return HasMany<ItemInstance>
      */
     public function items(): HasMany
@@ -27,6 +28,7 @@ trait HasItems
     /**
      * Get unique item instances that belong to this model.
      * A unique item instance is one that has its own data defined.
+     *
      * @return HasMany<ItemInstance>
      */
     public function unique_items(): HasMany

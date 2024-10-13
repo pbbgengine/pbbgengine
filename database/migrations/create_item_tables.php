@@ -28,6 +28,15 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('item_id')->references('id')->on('items');
         });
+
+        Schema::create('item_interactions', function (Blueprint $table) {
+            $table->id();
+            $table->string('class');
+            $table->unsignedBigInteger('item_id');
+            $table->json('data')->nullable();
+            $table->timestamps();
+            $table->foreign('item_id')->references('id')->on('items');
+        });
     }
 
     /**
@@ -35,6 +44,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('item_interactions');
         Schema::dropIfExists('item_instances');
         Schema::dropIfExists('items');
     }

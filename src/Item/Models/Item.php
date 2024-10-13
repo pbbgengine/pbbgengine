@@ -24,10 +24,21 @@ class Item extends Model
 
     /**
      * Get the instances of the item.
+     *
      * @return HasMany<ItemInstance>
      */
     public function instances(): HasMany
     {
         return $this->hasMany(ItemInstance::class);
+    }
+
+    /**
+     * Get the interactions of the item.
+     *
+     * @return HasMany<ItemInteraction>
+     */
+    public function interactions(): HasMany
+    {
+        return $this->hasMany(ItemInteraction::class);
     }
 }
