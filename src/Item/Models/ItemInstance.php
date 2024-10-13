@@ -85,10 +85,13 @@ class ItemInstance extends Model
      * An exception may be thrown to handle misconfigurations.
      *
      * @param string $class
+     * @param array<string, mixed> $context
      * @return MessageBag
-     * @throws Exception
+     * @throws DoesNotHaveInteraction
+     * @throws InteractionDoesNotExist
+     * @throws InvalidInteraction
      */
-    public function interact(string $class): MessageBag
+    public function interact(string $class, array $context = []): MessageBag
     {
         if (!class_exists($class)) {
             throw new InteractionDoesNotExist($class);
@@ -108,8 +111,8 @@ class ItemInstance extends Model
             throw new DoesNotHaveInteraction($this->item, $class);
         }
 
-        $handler = new $class;
-        $messages = $handler->handle($this);
+        $handler = new $class($interaction);
+        $messages = $handler->handle($this, $context);
 
         event(new ItemInteractionEvent($this, $handler, $messages));
 

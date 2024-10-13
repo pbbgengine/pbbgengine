@@ -8,9 +8,9 @@ use Illuminate\Support\MessageBag;
 use PbbgEngine\Item\Interactions\Interaction;
 use PbbgEngine\Item\Models\ItemInstance;
 
-class Drink implements Interaction
+class Drink extends Interaction
 {
-    public function handle(ItemInstance $instance): MessageBag
+    public function handle(ItemInstance $instance, array $context = []): MessageBag
     {
         $messages = new MessageBag();
 

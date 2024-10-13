@@ -114,7 +114,7 @@ class ItemTest extends TestCase
         $this->assertFalse($messages->has('errors'));
         $this->assertTrue($messages->has('success'));
 
-        $this->assertThrows(function() use($instance) {
+        $this->assertThrows(function() {
             $this->instance->interact(Drink::class);
         }, DoesNotHaveInteraction::class);
     }
