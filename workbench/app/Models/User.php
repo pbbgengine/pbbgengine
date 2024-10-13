@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 // use Laravel\Sanctum\HasApiTokens;
 use PbbgEngine\Item\Concerns\HasItems;
+use PbbgEngine\Quest\Concerns\HasQuests;
 use Workbench\Database\Factories\UserFactory;
 
 class User extends Authenticatable
@@ -15,7 +16,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    use HasItems;
+    use HasItems, HasQuests;
 
     /**
      * The attributes that are mass assignable.

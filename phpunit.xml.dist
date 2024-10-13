@@ -13,5 +13,8 @@
         <testsuite name="Item test suite">
             <directory>tests/Item</directory>
         </testsuite>
+        <testsuite name="Quest test suite">
+            <directory>tests/Quest</directory>
+        </testsuite>
     </testsuites>
 </phpunit>
