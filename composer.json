@@ -1,5 +1,6 @@
 {
   "name": "pbbgengine/pbbgengine",
+  "description": "Reusable components to build persistent browser-based games",
   "license": "MIT",
   "require": {
     "php": "^8.3",
@@ -8,6 +9,13 @@
   "autoload": {
     "psr-4": {
       "PbbgEngine\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "PbbgEngine\\Item\\ItemServiceProvider"
+      ]
     }
   },
   "require-dev": {
