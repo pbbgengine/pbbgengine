@@ -26,7 +26,7 @@ class QuestObjective extends Model
      */
     public function stage(): BelongsTo
     {
-        return $this->belongsTo(QuestStage::class);
+        return $this->belongsTo(QuestStage::class, 'quest_stage_id', 'id');
     }
 
     /**

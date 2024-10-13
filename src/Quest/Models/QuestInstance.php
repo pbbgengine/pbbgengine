@@ -55,4 +55,54 @@ class QuestInstance extends Model
     {
         return $this->morphTo();
     }
+
+    /**
+     * Applies quest progression for the given objective.
+     * Performs quest transitions that are applicable to the completed
+     * objective, stage and quests.
+     *
+     * @param QuestObjective $objective
+     * @param int $times
+     */
+    public function progress(QuestObjective $objective, int $times): void
+    {
+        $progress = $this->progress->get($objective->id, 0) + $times;
+        $progress = $progress > $objective->times_required ? $objective->times_required : $progress;
+        $this->progress->put($objective->id, $progress);
+        $this->save();
+
+        if ($progress < $objective->times_required) {
+            return;
+        }
+
+        // todo: handle transitions for objective completion
+
+        $stage = $objective->stage;
+        if (!$stage) {
+            return;
+        }
+        foreach ($stage->objectives as $objective) {
+            $progress = $this->progress->get($objective->id, 0);
+            if ($progress < $objective->times_required) {
+                return;
+            }
+        }
+
+        if ($stage->transitions !== null) {
+            foreach ($stage->transitions as $transition) {
+                switch ($transition->actionable_type) {
+                    case QuestStage::class:
+                        $this->current_quest_stage_id = $transition->actionable_id;
+                        $this->save();
+                        break;
+                    case Quest::class:
+                        if ($this->quest_id === $transition->actionable_id) {
+                            $this->completed_at = now();
+                        }
+                }
+            }
+        }
+
+        // todo: handle transitions for quest completion
+    }
 }
