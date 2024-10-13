@@ -1,4 +1,51 @@
 {
   "name": "pbbgengine/pbbgengine",
-  "license": "MIT"
+  "description": "Reusable components to build persistent browser-based games",
+  "license": "MIT",
+  "require": {
+    "php": "^8.3",
+    "laravel/framework": "^11"
+  },
+  "autoload": {
+    "psr-4": {
+      "PbbgEngine\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "PbbgEngine\\Item\\ItemServiceProvider"
+      ]
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.4",
+    "orchestra/testbench": "^9.5",
+    "larastan/larastan": "^2.9"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PbbgEngine\\Tests\\": "tests/",
+      "Workbench\\App\\": "workbench/app/",
+      "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+      "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+    }
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "@clear",
+      "@prepare"
+    ],
+    "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+    "prepare": "@php vendor/bin/testbench package:discover --ansi",
+    "build": "@php vendor/bin/testbench workbench:build --ansi",
+    "serve": [
+      "Composer\\Config::disableProcessTimeout",
+      "@build",
+      "@php vendor/bin/testbench serve --ansi"
+    ],
+    "lint": [
+      "@php vendor/bin/phpstan analyse --verbose --ansi"
+    ]
+  }
 }
