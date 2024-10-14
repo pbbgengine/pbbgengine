@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace PbbgEngine\Quest\Models;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
+use PbbgEngine\Quest\QuestService;
 
 /**
  * @property int $id
@@ -96,37 +98,16 @@ class QuestInstance extends Model
      * Handle quest transitions for the given collection of transitions.
      *
      * @param Collection<int, QuestTransition> $transitions
+     * @throws Exception
      */
     private function handleTransitions(Collection $transitions): void
     {
         foreach ($transitions as $transition) {
-            switch ($transition->actionable_type) {
-                case QuestStage::class:
-                    $this->current_quest_stage_id = $transition->actionable_id;
-                    $this->save();
-                    break;
-                case Quest::class:
-                    $this->handleQuestTransition($transition);
-                    break;
+            if (!isset(QuestService::$transitions[$transition->actionable_type])) {
+                throw new Exception("invalid transition actionable type: $transition->actionable_type");
             }
-        }
-    }
-
-    /**
-     * Handle a quest transition.
-     */
-    private function handleQuestTransition(QuestTransition $transition): void
-    {
-        if ($this->quest_id === $transition->actionable_id) {
-            $this->completed_at = now();
-            $this->save();
-        } else {
-            $this->model->quests()->create([
-                'model_type' => $this->model::class,
-                'quest_id' => $transition->actionable_id,
-                'progress' => [],
-                'current_quest_stage_id' => $transition->actionable->initial_quest_stage_id,
-            ]);
+            $handler = new QuestService::$transitions[$transition->actionable_type]();
+            $handler->handle($this, $transition);
         }
     }
 
