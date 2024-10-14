@@ -9,6 +9,7 @@ use PbbgEngine\Quest\Models\QuestObjective;
 use PbbgEngine\Quest\Models\QuestStage;
 use PbbgEngine\Tests\TestCase;
 use Workbench\App\Models\User;
+use Workbench\Database\Factories\GroupFactory;
 use Workbench\Database\Factories\UserFactory;
 
 class QuestTest extends TestCase
@@ -223,5 +224,50 @@ class QuestTest extends TestCase
         $this->assertEquals([$soloObjective->id => 1], $instance->progress->toArray());
         $this->assertNotNull($instance->completed_at);
         $this->assertTrue($this->user->quests()->where('quest_id', $soloQuest->id)->exists());
+    }
+
+    public function testRelatedQuestTracking(): void
+    {
+        $group = GroupFactory::new()->createOne();
+
+        $quest = Quest::create(['name' => 'Group quest']);
+        $stage = $quest->stages()->create(['name' => 'Group quest stage']);
+        $objective = $stage->objectives()->create([
+            'name' => 'Objective shared by group',
+            'task' => 'some_action',
+            'times_required' => 100,
+        ]);
+        $group->quests()->create([
+            'model_type' => $group::class,
+            'quest_id' => $quest->id,
+            'progress' => [],
+            'current_quest_stage_id' => $stage->id,
+        ]);
+        $quest->transitions()->create([
+            'triggerable_type' => Quest::class,
+            'actionable_type' => Quest::class,
+            'actionable_id' => $quest->id,
+        ]);
+
+        // all 3 users can contribute to the quest owned by the group
+        $user1 = UserFactory::new()->createOne(['group_id' => $group->id]);
+        $user2 = UserFactory::new()->createOne(['group_id' => $group->id]);
+        $user3 = UserFactory::new()->createOne(['group_id' => $group->id]);
+
+        $user1->progress('some_action', 32);
+        $instance = $group->quests()->first();
+        $this->assertNotNull($instance);
+        $this->assertEquals([$objective->id => 32], $instance->progress->toArray());
+
+        $user2->progress('some_action', 51);
+        $instance = $group->quests()->first();
+        $this->assertNotNull($instance);
+        $this->assertEquals([$objective->id => 83], $instance->progress->toArray());
+
+        $user3->progress('some_action', 25);
+        $instance = $group->quests()->first();
+        $this->assertNotNull($instance);
+        $this->assertEquals([$objective->id => 100], $instance->progress->toArray());
+        $this->assertNotNull($instance->completed_at);
     }
 }

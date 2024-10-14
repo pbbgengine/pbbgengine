@@ -16,6 +16,17 @@ use PbbgEngine\Quest\QuestProgressionService;
 trait HasQuests
 {
     /**
+     * Get related models that you also want to track quests for
+     * when the model progresses a quest objective.
+     *
+     * @return array<int, self|null>
+     */
+    protected function getRelatedQuestModels(): array
+    {
+        return [];
+    }
+
+    /**
      * Get quest instances that belong to this model.
      *
      * @return HasMany<QuestInstance>
@@ -35,14 +46,25 @@ trait HasQuests
      */
     public function progress(string $task, int $times = 1): void
     {
-        $instances = $this->relationLoaded('quests')
-            ? $this->quests->whereNull('completed_at')
-            : $this->quests()->whereNull('completed_at')->get();
+        $models = array_merge([$this], $this->getRelatedQuestModels());
+        $models = array_filter($models, fn ($model) => is_object($model));
+        foreach ($models as $model) {
+            $traits = class_uses($model::class);
+            if (!is_array($traits) || !in_array(HasQuests::class, $traits)) {
+                throw new Exception($model::class . " does not support quests");
+            }
+            if (!is_subclass_of($model, Model::class)) {
+                throw new Exception($model::class . " is not a model");
+            }
+            $instances = $model->relationLoaded('quests')
+                ? $model->quests->whereNull('completed_at')
+                : $model->quests()->whereNull('completed_at')->get();
 
-        $service = new QuestProgressionService();
+            $service = new QuestProgressionService();
 
-        foreach ($instances as $instance) {
-            $service->progress($instance, $task, $times);
+            foreach ($instances as $instance) {
+                $service->progress($instance, $task, $times);
+            }
         }
     }
 }
