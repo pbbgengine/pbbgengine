@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PbbgEngine\Quest\Transitions;
 
 use Exception;
+use PbbgEngine\Quest\Exceptions\StageNotFound;
 use PbbgEngine\Quest\Models\QuestInstance;
 use PbbgEngine\Quest\Models\QuestTransition;
 
@@ -28,7 +29,7 @@ class QuestStageCompleted implements Transition
         })->first();
 
         if (!$instance) {
-            throw new Exception("does not have stage {$transition->actionable_id}");
+            throw new StageNotFound($transition->actionable_id);
         }
 
         $instance->current_quest_stage_id = $transition->actionable_id;

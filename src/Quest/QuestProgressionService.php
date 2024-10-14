@@ -6,6 +6,10 @@ namespace PbbgEngine\Quest;
 
 use Exception;
 use PbbgEngine\Quest\Events\TransitionEvent;
+use PbbgEngine\Quest\Exceptions\InvalidTransition;
+use PbbgEngine\Quest\Exceptions\QuestNotFound;
+use PbbgEngine\Quest\Exceptions\StageNotFound;
+use PbbgEngine\Quest\Exceptions\UnknownTransition;
 use PbbgEngine\Quest\Models\Quest;
 use PbbgEngine\Quest\Models\QuestInstance;
 use PbbgEngine\Quest\Models\QuestObjective;
@@ -37,12 +41,12 @@ class QuestProgressionService
     {
         $quest = $instance->quest;
         if (!$quest) {
-            throw new Exception("quest not found");
+            throw new QuestNotFound($instance->quest_id);
         }
 
         $stage = $quest->stages()->where('id', $instance->current_quest_stage_id)->first();
         if (!$stage) {
-            throw new Exception("stage not found");
+            throw new StageNotFound($instance->current_quest_stage_id);
         }
 
         $objective = $stage->objectives()->where('task', $task)->first();
@@ -89,10 +93,10 @@ class QuestProgressionService
     {
         foreach ($transitions as $transition) {
             if (!isset($this->transitions[$transition->actionable_type])) {
-                throw new Exception("invalid transition actionable type: $transition->actionable_type");
+                throw new UnknownTransition($transition->actionable_type);
             }
             if (!is_subclass_of($this->transitions[$transition->actionable_type], Transition::class)) {
-                throw new Exception("invalid transition handler: $transition->actionable_type");
+                throw new InvalidTransition($transition->actionable_type);
             }
             $handler = new $this->transitions[$transition->actionable_type]();
             $handler->handle($instance, $transition);

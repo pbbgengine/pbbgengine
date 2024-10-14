@@ -7,6 +7,7 @@ namespace PbbgEngine\Quest\Concerns;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use PbbgEngine\Quest\Exceptions\QuestsUnsupported;
 use PbbgEngine\Quest\Models\QuestInstance;
 use PbbgEngine\Quest\QuestProgressionService;
 
@@ -64,10 +65,10 @@ trait HasQuests
         foreach ($models as $model) {
             $traits = class_uses($model::class);
             if (!is_array($traits) || !in_array(HasQuests::class, $traits)) {
-                throw new Exception($model::class . " does not support quests");
+                throw new QuestsUnsupported($model);
             }
             if (!is_subclass_of($model, Model::class)) {
-                throw new Exception($model::class . " is not a model");
+                throw new QuestsUnsupported($model);
             }
             $instances = $model->relationLoaded('quests')
                 ? $model->quests->whereNull('completed_at')
