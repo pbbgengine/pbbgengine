@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use PbbgEngine\Quest\Models\QuestInstance;
+use PbbgEngine\Quest\QuestProgressionService;
 
 /**
  * @mixin Model
@@ -34,25 +35,14 @@ trait HasQuests
      */
     public function progress(string $task, int $times = 1): void
     {
-        if ($this->relationLoaded('quests')) {
-            $instances = $this->quests->whereNull('completed_at');
-        } else {
-            $instances = $this->quests()->whereNull('completed_at')->get();
-        }
+        $instances = $this->relationLoaded('quests')
+            ? $this->quests->whereNull('completed_at')
+            : $this->quests()->whereNull('completed_at')->get();
+
+        $service = new QuestProgressionService();
+
         foreach ($instances as $instance) {
-            $quest = $instance->quest;
-            if (!$quest) {
-                throw new Exception("quest not found");
-            }
-            $stage = $quest->stages()->where('id', $instance->current_quest_stage_id)->first();
-            if (!$stage) {
-                throw new Exception("stage not found");
-            }
-            $objective = $stage->objectives()->where('task', $task)->first();
-            if (!$objective) {
-                continue;
-            }
-            $instance->progress($objective, $times);
+            $service->progress($instance, $task, $times);
         }
     }
 }
