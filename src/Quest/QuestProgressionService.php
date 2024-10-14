@@ -36,12 +36,12 @@ class QuestProgressionService
     {
         $quest = $instance->quest;
         if (!$quest) {
-            throw new \Exception("quest not found");
+            throw new Exception("quest not found");
         }
 
         $stage = $quest->stages()->where('id', $instance->current_quest_stage_id)->first();
         if (!$stage) {
-            throw new \Exception("stage not found");
+            throw new Exception("stage not found");
         }
 
         $objective = $stage->objectives()->where('task', $task)->first();
