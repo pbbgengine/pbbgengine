@@ -30,17 +30,13 @@ trait HasQuests
      * Performs quest progression on uncompleted quest instances
      * that have the given task as an objective on the active stage.
      *
-     * @param string $task
-     * @param int $times
      * @throws Exception
      */
     public function progress(string $task, int $times = 1): void
     {
         if ($this->relationLoaded('quests')) {
-            /** @var QuestInstance[] $instances */
             $instances = $this->quests->whereNull('completed_at');
         } else {
-            /** @var QuestInstance[] $instances */
             $instances = $this->quests()->whereNull('completed_at')->get();
         }
         foreach ($instances as $instance) {

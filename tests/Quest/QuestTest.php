@@ -180,7 +180,11 @@ class QuestTest extends TestCase
             'progress' => [],
         ]);
 
+        $this->assertNotNull($this->user);
+
         $instance = $this->user->quests->where('id', $quest->id)->first();
+
+        $this->assertNotNull($instance);
 
         $this->user->progress('join_team:red');
 
@@ -192,9 +196,10 @@ class QuestTest extends TestCase
         $this->assertNotNull($instance->completed_at);
 
         $instance->completed_at = null;
-        $instance->progress = [];
+        $instance->progress = collect();
         $instance->current_quest_stage_id = $quest->initial_quest_stage_id;
         $instance->save();
+        $instance = $instance->refresh();
 
         $this->user->progress('join_team:blue');
 
@@ -210,7 +215,7 @@ class QuestTest extends TestCase
         $this->assertNotNull($instance->completed_at);
 
         $instance->completed_at = null;
-        $instance->progress = [];
+        $instance->progress = collect();
         $instance->current_quest_stage_id = $quest->initial_quest_stage_id;
         $instance->save();
 
