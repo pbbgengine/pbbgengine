@@ -71,11 +71,36 @@ class QuestInstance extends Model
         $this->progress->put($objective->id, $progress);
         $this->save();
 
+
+
         if ($progress < $objective->times_required) {
             return;
         }
 
-        // todo: handle transitions for objective completion
+        // objective complete
+        if ($objective->transitions !== null) {
+            foreach ($objective->transitions as $transition) {
+                switch ($transition->actionable_type) {
+                    case QuestStage::class:
+                        $this->current_quest_stage_id = $transition->actionable_id;
+                        $this->save();
+                        break;
+                    case Quest::class:
+                        if ($this->quest_id === $transition->actionable_id) {
+                            $this->completed_at = now();
+                            $this->save();
+                        } else {
+                            $this->model->quests()->create([
+                                'model_type' => $this->model::class,
+                                'quest_id' => $transition->actionable_id,
+                                'progress' => [],
+                                'current_quest_stage_id' => $transition->actionable->initial_quest_stage_id,
+                            ]);
+                        }
+                        break;
+                }
+            }
+        }
 
         $stage = $objective->stage;
         if (!$stage) {
@@ -88,6 +113,8 @@ class QuestInstance extends Model
             }
         }
 
+        // stage complete
+
         if ($stage->transitions !== null) {
             foreach ($stage->transitions as $transition) {
                 switch ($transition->actionable_type) {
@@ -98,11 +125,49 @@ class QuestInstance extends Model
                     case Quest::class:
                         if ($this->quest_id === $transition->actionable_id) {
                             $this->completed_at = now();
+                            $this->save();
+                        } else {
+                            $this->model->quests()->create([
+                                'model_type' => $this->model::class,
+                                'quest_id' => $transition->actionable_id,
+                                'progress' => [],
+                                'current_quest_stage_id' => $transition->actionable->initial_quest_stage_id,
+                            ]);
                         }
+                        break;
                 }
             }
         }
 
-        // todo: handle transitions for quest completion
+        // quest complete
+
+        $quest = $stage->quest;
+        if (!$quest) {
+            return;
+        }
+
+        if ($quest->transitions !== null) {
+            foreach ($quest->transitions as $transition) {
+                switch ($transition->actionable_type) {
+                    case QuestStage::class:
+                        $this->current_quest_stage_id = $transition->actionable_id;
+                        $this->save();
+                        break;
+                    case Quest::class:
+                        if ($this->quest_id === $transition->actionable_id) {
+                            $this->completed_at = now();
+                            $this->save();
+                        } else {
+                            $this->model->quests()->create([
+                                'model_type' => $this->model::class,
+                                'quest_id' => $transition->actionable_id,
+                                'progress' => [],
+                                'current_quest_stage_id' => $transition->actionable->initial_quest_stage_id,
+                            ]);
+                        }
+                        break;
+                }
+            }
+        }
     }
 }

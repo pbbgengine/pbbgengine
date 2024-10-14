@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PbbgEngine\Tests\Quest;
 
 use PbbgEngine\Quest\Models\Quest;
+use PbbgEngine\Quest\Models\QuestObjective;
 use PbbgEngine\Quest\Models\QuestStage;
 use PbbgEngine\Tests\TestCase;
 use Workbench\App\Models\User;
@@ -112,5 +113,110 @@ class QuestTest extends TestCase
         $this->assertEquals([1 => 3, 2 => 1, 3 => 5], $instance->progress->toArray());
         // completed by the quest stage transition 2
         $this->assertNotNull($instance->completed_at);
+    }
+
+    public function testQuestTransitions(): void
+    {
+        $quest = Quest::create(['name' => 'Test transitions']);
+        $stage = $quest->stages()->create(['name' => 'Choose a side']);
+        $quest->initial_quest_stage_id = $stage->id;
+        $quest->save();
+
+        $soloQuest = Quest::create(['name' => 'Solo quest']);
+        $soloQuestStage = $soloQuest->stages()->create(['name' => 'Solo quest stage']);
+        $soloQuest->initial_quest_stage_id = $soloQuestStage->id;
+        $soloQuest->save();
+
+        $redObjective = $stage->objectives()->create(['name' => 'Join the red team', 'task' => 'join_team:red']);
+        $blueObjective = $stage->objectives()->create(['name' => 'Join the blue team', 'task' => 'join_team:blue']);
+        $soloObjective = $stage->objectives()->create(['name' => 'Go solo', 'task' => 'go_solo']);
+
+        $redStage = $quest->stages()->create(['name' => 'Red stage']);
+        $defeatBlueObjective = $redStage->objectives()->create(['name' => 'Defeat the blue team', 'task' => 'defeat:blue', 'times_required' => 5]);
+
+        $blueStage = $quest->stages()->create(['name' => 'Blue stage']);
+        $defeatRedObjective = $blueStage->objectives()->create(['name' => 'Defeat the red team', 'task' => 'defeat:red', 'times_required' => 5]);
+
+        $redObjective->transitions()->create([
+            'triggerable_type' => QuestObjective::class,
+            'actionable_type' => QuestStage::class,
+            'actionable_id' => $redStage->id,
+        ]);
+
+        $blueObjective->transitions()->create([
+            'triggerable_type' => QuestObjective::class,
+            'actionable_type' => QuestStage::class,
+            'actionable_id' => $blueStage->id,
+        ]);
+
+        $soloObjective->transitions()->create([
+            'triggerable_type' => QuestObjective::class,
+            'actionable_type' => Quest::class,
+            'actionable_id' => $quest->id,
+        ]);
+
+        $soloObjective->transitions()->create([
+            'triggerable_type' => QuestObjective::class,
+            'actionable_type' => Quest::class,
+            'actionable_id' => $soloQuest->id,
+        ]);
+
+        $redStage->transitions()->create([
+            'triggerable_type' => QuestStage::class,
+            'actionable_type' => Quest::class,
+            'actionable_id' => $quest->id,
+        ]);
+
+        $blueStage->transitions()->create([
+            'triggerable_type' => QuestStage::class,
+            'actionable_type' => Quest::class,
+            'actionable_id' => $quest->id,
+        ]);
+
+        $this->user->quests()->create([
+            'model_type' => $this->user::class,
+            'quest_id' => $quest->id,
+            'current_quest_stage_id' => $quest->initial_quest_stage_id,
+            'progress' => [],
+        ]);
+
+        $instance = $this->user->quests->where('id', $quest->id)->first();
+
+        $this->user->progress('join_team:red');
+
+        $this->assertEquals([$redObjective->id => 1], $instance->progress->toArray());
+        $this->assertEquals($redStage->id, $instance->current_quest_stage_id);
+
+        $this->user->progress('defeat:blue', 5);
+        $this->assertEquals([$redObjective->id => 1, $defeatBlueObjective->id => 5], $instance->progress->toArray());
+        $this->assertNotNull($instance->completed_at);
+
+        $instance->completed_at = null;
+        $instance->progress = [];
+        $instance->current_quest_stage_id = $quest->initial_quest_stage_id;
+        $instance->save();
+
+        $this->user->progress('join_team:blue');
+
+        $this->assertEquals([$blueObjective->id => 1], $instance->progress->toArray());
+        $this->assertEquals($blueStage->id, $instance->current_quest_stage_id);
+
+        $this->user->progress('defeat:red', 2);
+        $this->assertEquals([$blueObjective->id => 1, $defeatRedObjective->id => 2], $instance->progress->toArray());
+        $this->assertNull($instance->completed_at);
+
+        $this->user->progress('defeat:red', 6);
+        $this->assertEquals([$blueObjective->id => 1, $defeatRedObjective->id => 5], $instance->progress->toArray());
+        $this->assertNotNull($instance->completed_at);
+
+        $instance->completed_at = null;
+        $instance->progress = [];
+        $instance->current_quest_stage_id = $quest->initial_quest_stage_id;
+        $instance->save();
+
+        $this->user->progress('go_solo');
+        $this->assertEquals([$soloObjective->id => 1], $instance->progress->toArray());
+        $this->assertNotNull($instance->completed_at);
+        $this->assertTrue($this->user->quests()->where('quest_id', $soloQuest->id)->exists());
     }
 }
