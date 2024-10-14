@@ -23,7 +23,7 @@ class QuestTest extends TestCase
         $quest->initial_quest_stage_id = $stage->id;
         $quest->save();
 
-        $stage->objectives()->create(['name' => 'Stage 1, Objective 1', 'task' => 'test:123', 'times_required' => 3]);
+        $stage->objectives()->create(['name' => 'Stage 1, Objective 1', 'task' => 'test:123', 'times_required' => 10]);
         $stage->objectives()->create(['name' => 'Stage 1, Objective 2', 'task' => 'hello']);
 
         $stage2 = $quest->stages()->create(['name' => 'Stage 2']);
@@ -102,16 +102,18 @@ class QuestTest extends TestCase
         $this->assertEquals([], $instance->progress->toArray());
         $this->user->progress('test:123');
         $this->assertEquals([1 => 1], $instance->progress->toArray());
+        $this->user->progress('test:123', 5, false);
+        $this->assertEquals([1 => 5], $instance->progress->toArray());
         $this->user->progress('test:123', 100);
-        $this->assertEquals([1 => 3], $instance->progress->toArray());
+        $this->assertEquals([1 => 10], $instance->progress->toArray());
         $this->user->progress('hello');
-        $this->assertEquals([1 => 3, 2 => 1], $instance->progress->toArray());
+        $this->assertEquals([1 => 10, 2 => 1], $instance->progress->toArray());
         // moved to the next stage by quest stage transition 1
         $this->assertEquals(2, $instance->current_quest_stage_id);
         $this->user->progress('hello', 4);
-        $this->assertEquals([1 => 3, 2 => 1, 3 => 4], $instance->progress->toArray());
+        $this->assertEquals([1 => 10, 2 => 1, 3 => 4], $instance->progress->toArray());
         $this->user->progress('hello');
-        $this->assertEquals([1 => 3, 2 => 1, 3 => 5], $instance->progress->toArray());
+        $this->assertEquals([1 => 10, 2 => 1, 3 => 5], $instance->progress->toArray());
         // completed by the quest stage transition 2
         $this->assertNotNull($instance->completed_at);
     }

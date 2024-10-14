@@ -44,7 +44,7 @@ trait HasQuests
      *
      * @throws Exception
      */
-    public function progress(string $task, int $times = 1): void
+    public function progress(string $task, int $times = 1, bool $increment = true): void
     {
         $models = array_merge([$this], $this->getRelatedQuestModels());
         $models = array_filter($models, fn ($model) => is_object($model));
@@ -63,7 +63,7 @@ trait HasQuests
             $service = new QuestProgressionService();
 
             foreach ($instances as $instance) {
-                $service->progress($instance, $task, $times);
+                $service->progress($instance, $task, $times, $increment);
             }
         }
     }
