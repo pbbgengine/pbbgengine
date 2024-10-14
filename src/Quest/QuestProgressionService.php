@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PbbgEngine\Quest;
 
 use Exception;
+use PbbgEngine\Quest\Events\TransitionEvent;
 use PbbgEngine\Quest\Models\Quest;
 use PbbgEngine\Quest\Models\QuestInstance;
 use PbbgEngine\Quest\Models\QuestObjective;
@@ -95,6 +96,7 @@ class QuestProgressionService
             }
             $handler = new $this->transitions[$transition->actionable_type]();
             $handler->handle($instance, $transition);
+            event(new TransitionEvent($instance, $transition));
         }
     }
 
