@@ -102,7 +102,7 @@ class QuestTest extends TestCase
         $this->assertEquals([], $instance->progress->toArray());
         $this->user->progress('test:123');
         $this->assertEquals([1 => 1], $instance->progress->toArray());
-        $this->user->progress('test:123', 5, false);
+        $this->user->progressTo('test:123', 5);
         $this->assertEquals([1 => 5], $instance->progress->toArray());
         $this->user->progress('test:123', 100);
         $this->assertEquals([1 => 10], $instance->progress->toArray());

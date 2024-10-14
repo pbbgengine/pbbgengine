@@ -41,6 +41,19 @@ trait HasQuests
     /**
      * Performs quest progression on uncompleted quest instances
      * that have the given task as an objective on the active stage.
+     * Sets the objective times performed to the given value.
+     *
+     * @throws Exception
+     */
+    public function progressTo(string $task, int $value): void
+    {
+        $this->progress($task, $value, false);
+    }
+
+    /**
+     * Performs quest progression on uncompleted quest instances
+     * that have the given task as an objective on the active stage.
+     * Increments the objective value by the amount of times performed.
      *
      * @throws Exception
      */
