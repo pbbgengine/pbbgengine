@@ -5,14 +5,26 @@ declare(strict_types=1);
 namespace PbbgEngine\Tests\Crafting;
 
 use PbbgEngine\Crafting\CraftingService;
+use PbbgEngine\Crafting\CraftingServiceProvider;
 use PbbgEngine\Crafting\Models\Blueprint;
+use PbbgEngine\Item\ItemServiceProvider;
 use PbbgEngine\Item\Models\Item;
 use PbbgEngine\Quest\Models\Quest;
+use PbbgEngine\Quest\QuestServiceProvider;
 use PbbgEngine\Tests\TestCase;
 use Workbench\Database\Factories\UserFactory;
 
 class CraftingTest extends TestCase
 {
+    protected function getPackageProviders($app): array
+    {
+        return [
+            ItemServiceProvider::class,
+            QuestServiceProvider::class,
+            CraftingServiceProvider::class,
+        ];
+    }
+
     public function testBlueprintHasComponents(): void
     {
         $dough = Item::create(['name' => 'Bread dough']);
@@ -70,7 +82,7 @@ class CraftingTest extends TestCase
             'model_id' => $water->id,
         ]);
 
-        $service = new CraftingService();
+        $service = app(CraftingService::class);
         $this->assertFalse($service->canCraft($user, $blueprint));
 
         $user->items()->create([

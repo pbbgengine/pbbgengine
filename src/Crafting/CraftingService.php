@@ -6,39 +6,28 @@ namespace PbbgEngine\Crafting;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use PbbgEngine\Crafting\Conditions\Condition;
 use PbbgEngine\Crafting\Models\Blueprint;
-use PbbgEngine\Item\Models\Item;
-use PbbgEngine\Quest\Models\Quest;
 
 class CraftingService
 {
+    /**
+     * @var array<string, string>
+     */
+    public array $conditions = [];
+
     public function canCraft(Model $model, Blueprint $blueprint): bool
     {
         foreach ($blueprint->components as $component) {
-            switch ($component->model_type) {
-                case Item::class:
-                    // todo: create per model handlers
-                    if (!method_exists($model, 'items')) {
-                        throw new Exception("{$model} cannot have items");
-                    }
-                    if ($model->items()->where('item_id', $component->model_id)->count() == 0) {
-                        return false;
-                    }
-                    break;
-                case Quest::class:
-                    if (!method_exists($model, 'quests')) {
-                        throw new Exception("{$model} cannot have quests");
-                    }
-                    $hasCompletedQuest = $model->quests()
-                            ->where('quest_id', $component->model_id)
-                            ->whereNotNull('completed_at')
-                            ->count() > 0;
-                    if (!$hasCompletedQuest) {
-                        return false;
-                    }
-                    break;
-                default:
-                    throw new Exception("invalid crafting component model type: $component->model_type");
+            if (!isset($this->conditions[$component->model_type]) || !class_exists($this->conditions[$component->model_type])) {
+                throw new Exception("component condition handler does not exist for model: $component->model_type");
+            }
+            if (!is_subclass_of($this->conditions[$component->model_type], Condition::class)) {
+                throw new Exception("invalid component condition handler: $component->model_type");
+            }
+            $handler = new $this->conditions[$component->model_type];
+            if (!$handler->passes($model, $component)) {
+                return false;
             }
         }
 

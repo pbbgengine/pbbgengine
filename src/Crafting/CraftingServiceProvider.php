@@ -17,6 +17,14 @@ class CraftingServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        $this->app->singleton(CraftingService::class);
+    }
+
+    /**
      * Publish the crafting table migrations.
      */
     public function publishMigrations(): void

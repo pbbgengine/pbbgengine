@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace PbbgEngine\Item;
 
 use Illuminate\Support\ServiceProvider;
+use PbbgEngine\Crafting\CraftingService;
+use PbbgEngine\Item\Crafting\Conditions\HasItemToCraft;
+use PbbgEngine\Item\Models\Item;
 
 class ItemServiceProvider extends ServiceProvider
 {
@@ -14,6 +17,10 @@ class ItemServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishMigrations();
+
+        // todo: only apply when crafting is enabled
+        $service = app(CraftingService::class);
+        $service->conditions[Item::class] = HasItemToCraft::class;
     }
 
     /**
