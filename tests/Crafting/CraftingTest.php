@@ -134,4 +134,53 @@ class CraftingTest extends TestCase
         // can craft, user has finished the quest
         $this->assertTrue($service->canCraft($user, $blueprint));
     }
+
+    public function testCraft(): void
+    {
+        $user = UserFactory::new()->createOne();
+
+        $dough = Item::create(['name' => 'Bread dough']);
+        $blueprint = Blueprint::create([
+            'name' => 'Recipe: Bread dough',
+            'model_type' => $dough::class,
+            'model_id' => $dough->id],
+        );
+
+        $flour = Item::create(['name' => 'Pot of flour']);
+        $blueprint->components()->create([
+            'model_type' => $flour::class,
+            'model_id' => $flour->id,
+        ]);
+
+        $water = Item::create(['name' => 'Bucket of water']);
+        $blueprint->components()->create([
+            'model_type' => $water::class,
+            'model_id' => $water->id,
+        ]);
+
+        $service = app(CraftingService::class);
+
+        $this->assertFalse($service->craft($user, $blueprint));
+
+        $user->items()->create([
+            'model_type' => $user::class,
+            'item_id' => $flour->id
+        ]);
+
+        $user->items()->create([
+            'model_type' => $user::class,
+            'item_id' => $water->id
+        ]);
+
+        // can craft, has the required items
+        $this->assertTrue($service->craft($user, $blueprint));
+
+        $this->assertCount(1, $user->items);
+        $itemInstance = $user->items->first();
+        $this->assertNotNull($itemInstance);
+        $this->assertEquals($dough->id, $itemInstance->model_id);
+
+        // cannot craft, no longer has the flour and water
+        $this->assertFalse($service->craft($user, $blueprint));
+    }
 }
