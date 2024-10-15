@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use PbbgEngine\Crafting\Actions\Action;
 use PbbgEngine\Crafting\Builders\Builder;
 use PbbgEngine\Crafting\Conditions\Condition;
+use PbbgEngine\Crafting\Exceptions\HandlerDoesNotExist;
+use PbbgEngine\Crafting\Exceptions\InvalidHandler;
 use PbbgEngine\Crafting\Models\Blueprint;
 use PbbgEngine\Crafting\Models\Component;
 
@@ -48,10 +50,10 @@ class CraftingService
     {
         foreach ($blueprint->components as $component) {
             if (!isset($this->conditions[$component->model_type]) || !class_exists($this->conditions[$component->model_type])) {
-                throw new Exception("component condition handler does not exist for model: $component->model_type");
+                throw new HandlerDoesNotExist("component condition handler does not exist for model: $component->model_type");
             }
             if (!is_subclass_of($this->conditions[$component->model_type], Condition::class)) {
-                throw new Exception("invalid component condition handler: $component->model_type");
+                throw new InvalidHandler("invalid component condition handler: $component->model_type");
             }
             $handler = new $this->conditions[$component->model_type];
             if (!$handler->passes($model, $component)) {
@@ -98,14 +100,11 @@ class CraftingService
      */
     private function validateBuilder(string $model): void
     {
-        if (!isset($this->builders[$model])) {
-            throw new Exception("blueprint builder does not exist for model: $model");
-        }
-        if (!class_exists($this->builders[$model])) {
-            throw new Exception("specified component action runner does not exist for model: $model");
+        if (!isset($this->builders[$model]) || !class_exists($this->builders[$model])) {
+            throw new HandlerDoesNotExist("blueprint builder does not exist for model: $model");
         }
         if (!is_subclass_of($this->builders[$model], Builder::class)) {
-            throw new Exception("invalid component action runner: $model");
+            throw new InvalidHandler("invalid blueprint builder: $model");
         }
     }
 
@@ -119,10 +118,10 @@ class CraftingService
             return;
         }
         if (!class_exists($this->actions[$component->model_type])) {
-            throw new Exception("specified component action runner does not exist for model: $component->model_type");
+            throw new HandlerDoesNotExist("specified component action runner does not exist for model: $component->model_type");
         }
         if (!is_subclass_of($this->actions[$component->model_type], Action::class)) {
-            throw new Exception("invalid component action runner: $component->model_type");
+            throw new InvalidHandler("invalid component action runner: $component->model_type");
         }
         $handler = new $this->actions[$component->model_type];
         $handler->run($model, $component);

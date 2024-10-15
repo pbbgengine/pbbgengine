@@ -6,6 +6,8 @@ namespace PbbgEngine\Tests\Crafting;
 
 use PbbgEngine\Crafting\CraftingService;
 use PbbgEngine\Crafting\CraftingServiceProvider;
+use PbbgEngine\Crafting\Exceptions\HandlerDoesNotExist;
+use PbbgEngine\Crafting\Exceptions\InvalidHandler;
 use PbbgEngine\Crafting\Models\Blueprint;
 use PbbgEngine\Item\ItemServiceProvider;
 use PbbgEngine\Item\Models\Item;
@@ -133,6 +135,25 @@ class CraftingTest extends TestCase
 
         // can craft, user has finished the quest
         $this->assertTrue($service->canCraft($user, $blueprint));
+
+        // let's add an invalid crafting component to force an exception
+        $blueprint->components()->create([
+            'model_type' => $user::class,
+            'model_id' => $user->id,
+        ]);
+
+        $blueprint->refresh();
+
+        $this->assertThrows(function() use ($service, $user, $blueprint) {
+            $service->canCraft($user, $blueprint);
+        }, HandlerDoesNotExist::class);
+
+        // adding an invalid condition handler to force an exception
+        $service->conditions[$user::class] = $user::class;
+
+        $this->assertThrows(function() use ($service, $user, $blueprint) {
+            $service->canCraft($user, $blueprint);
+        }, InvalidHandler::class);
     }
 
     public function testCraft(): void
