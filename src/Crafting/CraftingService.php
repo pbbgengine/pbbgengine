@@ -6,6 +6,7 @@ namespace PbbgEngine\Crafting;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\MessageBag;
 use PbbgEngine\Crafting\Actions\Action;
 use PbbgEngine\Crafting\Builders\Builder;
@@ -102,13 +103,22 @@ class CraftingService
         // ensure builder exists for the blueprint before running actions
         $this->validateBuilder($blueprint->model_type);
 
-        foreach ($blueprint->components as $component) {
-            $this->runComponentAction($model, $component);
+        DB::beginTransaction();
+
+        try {
+            foreach ($blueprint->components as $component) {
+                $this->runComponentAction($model, $component);
+            }
+
+            /** @var Builder $builder */
+            $builder = new $this->builders[$blueprint->model_type]($this->messages);
+            $builder->build($model, $blueprint);
+        } catch(Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
 
-        /** @var Builder $builder */
-        $builder = new $this->builders[$blueprint->model_type]($this->messages);
-        $builder->build($model, $blueprint);
+        DB::commit();
 
         return $this->messages;
     }
