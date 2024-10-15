@@ -7,6 +7,7 @@ namespace PbbgEngine\Quest\Transitions;
 use Exception;
 use PbbgEngine\Quest\Exceptions\StageNotFound;
 use PbbgEngine\Quest\Models\QuestInstance;
+use PbbgEngine\Quest\Models\QuestStage;
 use PbbgEngine\Quest\Models\QuestTransition;
 
 class QuestStageCompleted implements Transition
@@ -21,6 +22,7 @@ class QuestStageCompleted implements Transition
         if ($instance->quest_id === $transition->actionable->quest_id) {
             $instance->current_quest_stage_id = $transition->actionable_id;
             $instance->save();
+            return;
         }
 
         // allow progression of external quest

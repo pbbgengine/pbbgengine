@@ -272,4 +272,50 @@ class QuestTest extends TestCase
         $this->assertEquals([$objective->id => 100], $instance->progress->toArray());
         $this->assertNotNull($instance->completed_at);
     }
+
+    public function testExternalQuestTransition(): void
+    {
+        $quest1 = Quest::create(['name' => 'Quest 1']);
+        $stage1 = $quest1->stages()->create(['name' => 'Stage 1']);
+        $stage1->objectives()->create(['name' => 'This objective will progress quest2 stage', 'task' => 'task_name', 'times_required' => 88]);
+        $quest1->initial_quest_stage_id = $stage1->id;
+        $quest1->save();
+
+        $quest2 = Quest::create(['name' => 'Quest 2']);
+        $stage2 = $quest2->stages()->create(['name' => 'Stage 2']);
+        $quest2->initial_quest_stage_id = $stage2->id;
+        $quest2->save();
+
+        $stage3 = $quest2->stages()->create(['name' => 'Stage 2']);
+
+        $user = UserFactory::new()->createOne();
+
+        $user->quests()->create([
+            'model_type' => $user::class,
+            'quest_id' => $quest1->id,
+            'current_quest_stage_id' => $quest1->initial_quest_stage_id,
+            'progress' => [],
+        ]);
+
+        $user->quests()->create([
+            'model_type' => $user::class,
+            'quest_id' => $quest2->id,
+            'current_quest_stage_id' => $quest2->initial_quest_stage_id,
+            'progress' => [],
+        ]);
+
+        $stage1->transitions()->create([
+            'triggerable_type' => QuestStage::class,
+            'actionable_type' => QuestStage::class,
+            'actionable_id' => $stage3->id,
+        ]);
+
+        // completing stage in quest 1 triggers a transition to move to a stage belonging to quest 2
+        // so the quest 2 instance gets updated
+        $user->progress('task_name', 99);
+
+        $questInstance2 = $user->quests()->where('quest_id', $quest2->id)->first();
+        $this->assertNotNull($questInstance2);
+        $this->assertEquals($stage3->id, $questInstance2->current_quest_stage_id);
+    }
 }
