@@ -15,7 +15,8 @@
     "laravel": {
       "providers": [
         "PbbgEngine\\Item\\ItemServiceProvider",
-        "PbbgEngine\\Item\\QuestServiceProvider"
+        "PbbgEngine\\Item\\QuestServiceProvider",
+        "PbbgEngine\\Item\\CraftingServiceProvider"
       ]
     }
   },
