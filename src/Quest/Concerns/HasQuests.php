@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use PbbgEngine\Quest\Exceptions\QuestsUnsupported;
 use PbbgEngine\Quest\Models\QuestInstance;
+use PbbgEngine\Quest\Models\QuestObjective;
 use PbbgEngine\Quest\QuestProgressionService;
 
 /**
@@ -40,28 +41,47 @@ trait HasQuests
     }
 
     /**
-     * Performs quest progression on uncompleted quest instances
-     * that have the given task as an objective on the active stage.
      * Sets the objective times performed to the given value.
      *
      * @throws Exception
      */
     public function progressTo(string $task, int $value): void
     {
-        $this->progress($task, $value, false);
+        $this->progressQuests($task, $value, function(QuestInstance $instance, QuestObjective $objective, int $value): void
+        {
+            $progress = min($value, $objective->times_required);
+            $instance->progress->put($objective->id, $progress);
+            $instance->save();
+        });
+    }
+
+    /**
+     * Increments the objective value by the amount of times performed.
+     *
+     * @throws Exception
+     */
+    public function progress(string $task, int $times = 1): void
+    {
+        $this->progressQuests($task, $times, function(QuestInstance $instance, QuestObjective $objective, int $times): void
+        {
+            $progress = $instance->progress->get($objective->id, 0) + $times;
+            $progress = min($progress, $objective->times_required);
+            $instance->progress->put($objective->id, $progress);
+            $instance->save();
+        });
     }
 
     /**
      * Performs quest progression on uncompleted quest instances
      * that have the given task as an objective on the active stage.
-     * Increments the objective value by the amount of times performed.
      *
      * @throws Exception
      */
-    public function progress(string $task, int $times = 1, bool $increment = true): void
+    private function progressQuests(string $task, int $times, callable $updateProgress): void
     {
         $models = array_merge([$this], $this->getRelatedQuestModels());
         $models = array_filter($models, fn ($model) => is_object($model));
+        $service = new QuestProgressionService();
         foreach ($models as $model) {
             $traits = class_uses($model::class);
             if (!is_array($traits) || !in_array(HasQuests::class, $traits)) {
@@ -74,10 +94,8 @@ trait HasQuests
                 ? $model->quests->whereNull('completed_at')
                 : $model->quests()->whereNull('completed_at')->get();
 
-            $service = new QuestProgressionService();
-
             foreach ($instances as $instance) {
-                $service->progress($instance, $task, $times, $increment);
+                $service->progress($instance, $task, $times, $updateProgress);
             }
         }
     }

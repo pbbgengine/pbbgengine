@@ -37,7 +37,7 @@ class QuestProgressionService
      * Performs quest transitions that are applicable to the completed
      * objective, stage and quests.
      */
-    public function progress(QuestInstance $instance, string $task, int $times, bool $increment = true): void
+    public function progress(QuestInstance $instance, string $task, int $times, callable $updateProgress): void
     {
         $quest = $instance->quest;
         if (!$quest) {
@@ -54,7 +54,7 @@ class QuestProgressionService
             return;
         }
 
-        $this->updateProgress($instance, $objective, $times, $increment);
+        $updateProgress($instance, $objective, $times);
 
         if ($this->isObjectiveComplete($instance, $objective)) {
             $this->handleTransitions($instance, $objective->transitions);
@@ -62,17 +62,6 @@ class QuestProgressionService
                 $this->checkStageCompletion($instance, $objective->stage);
             }
         }
-    }
-
-    /**
-     * Update the progress of the given objective.
-     */
-    private function updateProgress(QuestInstance $instance, QuestObjective $objective, int $times, bool $increment = true): void
-    {
-        $progress = $increment ? $instance->progress->get($objective->id, 0) + $times : $times;
-        $progress = min($progress, $objective->times_required);
-        $instance->progress->put($objective->id, $progress);
-        $instance->save();
     }
 
     /**
