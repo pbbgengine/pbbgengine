@@ -9,5 +9,10 @@ use PbbgEngine\Crafting\Models\Blueprint;
 
 interface Builder
 {
+    /**
+     * Builds the blueprint.
+     *
+     * The model is typically the owner of what is created by the blueprint.
+     */
     public function build(Model $model, Blueprint $blueprint): bool;
 }
