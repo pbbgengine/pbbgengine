@@ -2,12 +2,13 @@
 
 namespace Workbench\App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-// use Laravel\Sanctum\HasApiTokens;
 use PbbgEngine\Item\Concerns\HasItems;
+use PbbgEngine\Quest\Concerns\HasQuests;
 use Workbench\Database\Factories\UserFactory;
 
 class User extends Authenticatable
@@ -15,7 +16,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    use HasItems;
+    use HasItems, HasQuests;
 
     /**
      * The attributes that are mass assignable.
@@ -26,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'group_id',
     ];
 
     /**
@@ -58,4 +60,20 @@ class User extends Authenticatable
         return UserFactory::new();
     }
 
+    /**
+     * @return BelongsTo<Group, User>
+     */
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
+    }
+
+
+    /**
+     * @return array<int, Group|null>
+     */
+    public function getRelatedQuestModels(): array
+    {
+        return [$this->group];
+    }
 }
