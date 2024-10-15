@@ -9,18 +9,16 @@ use Illuminate\Database\Eloquent\Model;
 use PbbgEngine\Crafting\Conditions\Condition;
 use PbbgEngine\Crafting\Models\Component;
 
-class HasItemToCraft implements Condition
+class HasItemToCraft extends Condition
 {
-    public function passes(Model $model, Component $component): bool
+    public function passes(Model $model, Component $component): void
     {
         if (!method_exists($model, 'items')) {
             throw new Exception("{$model} cannot have items");
         }
 
         if ($model->items()->where('item_id', $component->model_id)->count() == 0) {
-            return false;
+            $this->messages->add('errors', "Missing item {$component->model->name}");
         }
-
-        return true;
     }
 }

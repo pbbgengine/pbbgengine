@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use PbbgEngine\Crafting\Conditions\Condition;
 use PbbgEngine\Crafting\Models\Component;
 
-class HasCompletedQuest implements Condition
+class HasCompletedQuest extends Condition
 {
-    public function passes(Model $model, Component $component): bool
+    public function passes(Model $model, Component $component): void
     {
         if (!method_exists($model, 'quests')) {
             throw new Exception("{$model} cannot have quests");
@@ -23,9 +23,7 @@ class HasCompletedQuest implements Condition
                 ->count() > 0;
 
         if (!$hasCompletedQuest) {
-            return false;
+            $this->messages->add('errors', "Quest {$component->model->name} has not been completed");
         }
-
-        return true;
     }
 }

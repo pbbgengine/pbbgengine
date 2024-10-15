@@ -6,6 +6,7 @@ namespace PbbgEngine\Crafting;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\MessageBag;
 use PbbgEngine\Crafting\Actions\Action;
 use PbbgEngine\Crafting\Builders\Builder;
 use PbbgEngine\Crafting\Conditions\Condition;
@@ -42,13 +43,25 @@ class CraftingService
     public array $builders = [];
 
     /**
+     * The result of the crafting check or attempt.
+     * The "errors" key will be populated to denote any failures.
+     *
+     * The crafting occurred successfully if there is no "errors" key set.
+     */
+    public MessageBag $messages;
+
+    /**
      * Checks whether the required conditions for each component in the
      * blueprint are satisfied to be able to craft the given blueprint.
      *
+     * The returned message bag will contain errors if a condition was unmet.
+     *
      * @throws Exception
      */
-    public function canCraft(Model $model, Blueprint $blueprint): bool
+    public function canCraft(Model $model, Blueprint $blueprint): MessageBag
     {
+        $this->messages = new MessageBag();
+
         if ($blueprint->components->count() === 0) {
             throw new HasNoComponents($blueprint);
         }
@@ -60,13 +73,14 @@ class CraftingService
             if (!is_subclass_of($this->conditions[$component->model_type], Condition::class)) {
                 throw new InvalidHandler("invalid component condition handler: $component->model_type");
             }
-            $handler = new $this->conditions[$component->model_type];
-            if (!$handler->passes($model, $component)) {
-                return false;
+            $handler = new $this->conditions[$component->model_type]($this->messages);
+            $handler->passes($model, $component);
+            if ($this->messages->has('errors')) {
+                return $this->messages;
             }
         }
 
-        return true;
+        return $this->messages;
     }
 
     /**
@@ -75,12 +89,14 @@ class CraftingService
      * Runs optional actions for each component and builds the final result
      * using the specified builder for the blueprint model type.
      *
+     * The returned message bag will contain errors if a condition was unmet.
+     *
      * @throws Exception
      */
-    public function craft(Model $model, Blueprint $blueprint): bool
+    public function craft(Model $model, Blueprint $blueprint): MessageBag
     {
-        if (!$this->canCraft($model, $blueprint)) {
-            return false;
+        if ($this->canCraft($model, $blueprint)->has('errors')) {
+            return $this->messages;
         }
 
         // ensure builder exists for the blueprint before running actions
@@ -91,10 +107,10 @@ class CraftingService
         }
 
         /** @var Builder $builder */
-        $builder = new $this->builders[$blueprint->model_type];
+        $builder = new $this->builders[$blueprint->model_type]($this->messages);
         $builder->build($model, $blueprint);
 
-        return true;
+        return $this->messages;
     }
 
     /**
@@ -128,7 +144,7 @@ class CraftingService
         if (!is_subclass_of($this->actions[$component->model_type], Action::class)) {
             throw new InvalidHandler("invalid component action runner: $component->model_type");
         }
-        $handler = new $this->actions[$component->model_type];
+        $handler = new $this->actions[$component->model_type]($this->messages);
         $handler->run($model, $component);
     }
 }

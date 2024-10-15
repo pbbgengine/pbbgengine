@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use PbbgEngine\Crafting\Builders\Builder;
 use PbbgEngine\Crafting\Models\Blueprint;
 
-class CraftItem implements Builder
+class CraftItem extends Builder
 {
-    public function build(Model $model, Blueprint $blueprint): bool
+    public function build(Model $model, Blueprint $blueprint): void
     {
         if (!method_exists($model, 'items')) {
             throw new Exception("{$model} cannot have items");
@@ -22,6 +22,6 @@ class CraftItem implements Builder
             'item_id' => $blueprint->model_id,
         ]);
 
-        return true;
+        $this->messages->add('success', "Crafted item {$blueprint->model->name}");
     }
 }

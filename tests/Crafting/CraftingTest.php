@@ -86,7 +86,9 @@ class CraftingTest extends TestCase
         ]);
 
         $service = app(CraftingService::class);
-        $this->assertFalse($service->canCraft($user, $blueprint));
+        $result = $service->canCraft($user, $blueprint);
+        $this->assertHasErrors($result);
+        $this->assertEquals(["Missing item $flour->name"], $result->get('errors'));
 
         $user->items()->create([
             'model_type' => $user::class,
@@ -94,7 +96,9 @@ class CraftingTest extends TestCase
         ]);
 
         // cannot craft, is missing the bucket of water
-        $this->assertFalse($service->canCraft($user, $blueprint));
+        $result = $service->canCraft($user, $blueprint);
+        $this->assertHasErrors($result);
+        $this->assertEquals(["Missing item $water->name"], $result->get('errors'));
 
         $user->items()->create([
             'model_type' => $user::class,
@@ -102,7 +106,7 @@ class CraftingTest extends TestCase
         ]);
 
         // can craft, has all the required component
-        $this->assertTrue($service->canCraft($user, $blueprint));
+        $this->assertHasNoErrors($service->canCraft($user, $blueprint));
 
         // let's add a new component required to craft the blueprint
         // the user will be required to have completed this quest
@@ -119,7 +123,9 @@ class CraftingTest extends TestCase
         $blueprint->refresh();
 
         // cannot craft, user has not completed the quest or even started it
-        $this->assertFalse($service->canCraft($user, $blueprint));
+        $result = $service->canCraft($user, $blueprint);
+        $this->assertHasErrors($result);
+        $this->assertEquals(["Quest $quest->name has not been completed"], $result->get('errors'));
 
         $questInstance = $user->quests()->create([
             'model_type' => $user::class,
@@ -129,13 +135,15 @@ class CraftingTest extends TestCase
         ]);
 
         // cannot craft, user has not finished the quest
-        $this->assertFalse($service->canCraft($user, $blueprint));
+        $result = $service->canCraft($user, $blueprint);
+        $this->assertHasErrors($result);
+        $this->assertEquals(["Quest $quest->name has not been completed"], $result->get('errors'));;
 
         $questInstance->completed_at = now();
         $questInstance->save();
 
         // can craft, user has finished the quest
-        $this->assertTrue($service->canCraft($user, $blueprint));
+        $this->assertHasNoErrors($service->canCraft($user, $blueprint));
 
         // let's add an invalid crafting component to force an exception
         $blueprint->components()->create([
@@ -189,7 +197,7 @@ class CraftingTest extends TestCase
 
         $service = app(CraftingService::class);
 
-        $this->assertFalse($service->craft($user, $blueprint));
+        $this->assertHasErrors($service->craft($user, $blueprint));
 
         $user->items()->create([
             'model_type' => $user::class,
@@ -202,7 +210,7 @@ class CraftingTest extends TestCase
         ]);
 
         // can craft, has the required items
-        $this->assertTrue($service->craft($user, $blueprint));
+        $this->assertHasNoErrors($service->craft($user, $blueprint));
 
         $this->assertCount(1, $user->items);
         $itemInstance = $user->items->first();
@@ -210,6 +218,6 @@ class CraftingTest extends TestCase
         $this->assertEquals($dough->id, $itemInstance->model_id);
 
         // cannot craft, no longer has the flour and water
-        $this->assertFalse($service->craft($user, $blueprint));
+        $this->assertHasErrors($service->craft($user, $blueprint));
     }
 }

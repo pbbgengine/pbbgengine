@@ -6,10 +6,11 @@ namespace PbbgEngine\Item\Crafting\Actions;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\MessageBag;
 use PbbgEngine\Crafting\Actions\Action;
 use PbbgEngine\Crafting\Models\Component;
 
-class DeleteItem implements Action
+class DeleteItem extends Action
 {
     public function run(Model $model, Component $component): void
     {
