@@ -7,6 +7,7 @@ namespace PbbgEngine\Tests\Crafting;
 use PbbgEngine\Crafting\CraftingService;
 use PbbgEngine\Crafting\CraftingServiceProvider;
 use PbbgEngine\Crafting\Exceptions\HandlerDoesNotExist;
+use PbbgEngine\Crafting\Exceptions\HasNoComponents;
 use PbbgEngine\Crafting\Exceptions\InvalidHandler;
 use PbbgEngine\Crafting\Models\Blueprint;
 use PbbgEngine\Item\ItemServiceProvider;
@@ -154,6 +155,13 @@ class CraftingTest extends TestCase
         $this->assertThrows(function() use ($service, $user, $blueprint) {
             $service->canCraft($user, $blueprint);
         }, InvalidHandler::class);
+
+        $blueprint->components()->delete();
+        $blueprint->refresh();
+
+        $this->assertThrows(function() use ($service, $user, $blueprint) {
+            $service->canCraft($user, $blueprint);
+        }, HasNoComponents::class);
     }
 
     public function testCraft(): void

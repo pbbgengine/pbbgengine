@@ -10,6 +10,7 @@ use PbbgEngine\Crafting\Actions\Action;
 use PbbgEngine\Crafting\Builders\Builder;
 use PbbgEngine\Crafting\Conditions\Condition;
 use PbbgEngine\Crafting\Exceptions\HandlerDoesNotExist;
+use PbbgEngine\Crafting\Exceptions\HasNoComponents;
 use PbbgEngine\Crafting\Exceptions\InvalidHandler;
 use PbbgEngine\Crafting\Models\Blueprint;
 use PbbgEngine\Crafting\Models\Component;
@@ -48,6 +49,10 @@ class CraftingService
      */
     public function canCraft(Model $model, Blueprint $blueprint): bool
     {
+        if ($blueprint->components->count() === 0) {
+            throw new HasNoComponents($blueprint);
+        }
+
         foreach ($blueprint->components as $component) {
             if (!isset($this->conditions[$component->model_type]) || !class_exists($this->conditions[$component->model_type])) {
                 throw new HandlerDoesNotExist("component condition handler does not exist for model: $component->model_type");
