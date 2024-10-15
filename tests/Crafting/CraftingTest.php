@@ -78,6 +78,7 @@ class CraftingTest extends TestCase
             'item_id' => $flour->id
         ]);
 
+        // cannot craft, is missing the bucket of water
         $this->assertFalse($service->canCraft($user, $blueprint));
 
         $user->items()->create([
@@ -85,6 +86,40 @@ class CraftingTest extends TestCase
             'item_id' => $water->id
         ]);
 
+        // can craft, has all the required component
+        $this->assertTrue($service->canCraft($user, $blueprint));
+
+        // let's add a new component required to craft the blueprint
+        // the user will be required to have completed this quest
+        $quest = Quest::create(['name' => 'Bread making class']);
+        $stage = $quest->stages()->create(['name' => 'Learn the dough recipe']);
+        $quest->initial_quest_stage_id = $stage->id;
+        $quest->save();
+
+        $blueprint->components()->create([
+            'model_type' => $quest::class,
+            'model_id' => $quest->id,
+        ]);
+
+        $blueprint->refresh();
+
+        // cannot craft, user has not completed the quest or even started it
+        $this->assertFalse($service->canCraft($user, $blueprint));
+
+        $questInstance = $user->quests()->create([
+            'model_type' => $user::class,
+            'quest_id' => $quest->id,
+            'current_quest_stage_id' => $stage->id,
+            'progress' => [],
+        ]);
+
+        // cannot craft, user has not finished the quest
+        $this->assertFalse($service->canCraft($user, $blueprint));
+
+        $questInstance->completed_at = now();
+        $questInstance->save();
+
+        // can craft, user has finished the quest
         $this->assertTrue($service->canCraft($user, $blueprint));
     }
 }

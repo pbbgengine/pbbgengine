@@ -25,6 +25,18 @@ class CraftingService
                         return false;
                     }
                     break;
+                case Quest::class:
+                    if (!method_exists($model, 'quests')) {
+                        throw new Exception("{$this->model} cannot have quests");
+                    }
+                    $hasCompletedQuest = $model->quests()
+                            ->where('quest_id', $component->model_id)
+                            ->whereNotNull('completed_at')
+                            ->count() > 0;
+                    if (!$hasCompletedQuest) {
+                        return false;
+                    }
+                    break;
                 default:
                     throw new Exception("invalid crafting component model type: $component->model_type");
             }
