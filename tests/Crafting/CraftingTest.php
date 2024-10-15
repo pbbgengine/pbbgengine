@@ -49,7 +49,7 @@ class CraftingTest extends TestCase
 
     public function testModelCanCraft(): void
     {
-        $user = UserFactory::new()->create();
+        $user = UserFactory::new()->createOne();
 
         $dough = Item::create(['name' => 'Bread dough']);
         $blueprint = Blueprint::create([

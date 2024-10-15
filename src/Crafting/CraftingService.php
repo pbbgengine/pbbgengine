@@ -19,7 +19,7 @@ class CraftingService
                 case Item::class:
                     // todo: create per model handlers
                     if (!method_exists($model, 'items')) {
-                        throw new Exception("{$this->model} cannot have items");
+                        throw new Exception("{$model} cannot have items");
                     }
                     if ($model->items()->where('item_id', $component->model_id)->count() == 0) {
                         return false;
@@ -27,7 +27,7 @@ class CraftingService
                     break;
                 case Quest::class:
                     if (!method_exists($model, 'quests')) {
-                        throw new Exception("{$this->model} cannot have quests");
+                        throw new Exception("{$model} cannot have quests");
                     }
                     $hasCompletedQuest = $model->quests()
                             ->where('quest_id', $component->model_id)
