@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->morphs('model');
+            $table->json('data')->nullable();
             $table->timestamps();
         });
 
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('blueprint_id');
             $table->morphs('model');
+            $table->json('data')->nullable();
             $table->timestamps();
             $table->foreign('blueprint_id')->references('id')->on('blueprints');
         });
