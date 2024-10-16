@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace PbbgEngine\Quest;
 
 use Illuminate\Support\ServiceProvider;
+use PbbgEngine\Crafting\CraftingService;
+use PbbgEngine\Quest\Crafting\Builders\StartQuest;
+use PbbgEngine\Quest\Crafting\Conditions\HasCompletedQuest;
+use PbbgEngine\Quest\Models\Quest;
 
 class QuestServiceProvider extends ServiceProvider
 {
@@ -14,6 +18,11 @@ class QuestServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishMigrations();
+
+        // todo: only apply when crafting is enabled
+        $service = app(CraftingService::class);
+        $service->conditions[Quest::class] = HasCompletedQuest::class;
+        $service->builders[Quest::class] = StartQuest::class;
     }
 
     /**
