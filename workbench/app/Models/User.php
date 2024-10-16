@@ -3,12 +3,12 @@
 namespace Workbench\App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PbbgEngine\Item\Concerns\HasItems;
 use PbbgEngine\Quest\Concerns\HasQuests;
+use PbbgEngine\Stat\Concerns\HasStats;
 use Workbench\Database\Factories\UserFactory;
 
 class User extends Authenticatable
@@ -16,7 +16,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    use HasItems, HasQuests;
+    use HasItems, HasQuests, HasStats;
 
     /**
      * The attributes that are mass assignable.
