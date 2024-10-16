@@ -17,7 +17,7 @@ trait HasStats
     /**
      * @return HasOne<StatInstance>
      */
-    public function statInstance(): HasOne
+    public function stats(): HasOne
     {
         return $this->hasOne(StatInstance::class, 'model_id', $this->primaryKey)
             ->where('model_type', self::class);
@@ -29,17 +29,22 @@ trait HasStats
     public function getStatsAttribute(): Collection
     {
         if (!isset($this->attributes['stats'])) {
-            $this->attributes['stats'] = $this->statInstance?->data;
+            if (!isset($this->relations['stats'])) {
+                $this->load('stats');
+            }
+
+            $this->attributes['stats'] = $this->relations['stats']?->data;
 
             if ($this->attributes['stats'] === null) {
-                $this->statInstance()->create([
+                $this->stats()->create([
                     'model_type' => self::class,
                     'model_id' => $this->{$this->primaryKey},
                     'data' => [],
                 ]);
-                $this->unsetRelation('statInstance');
+                $this->unsetRelation('stats');
+                $this->load('stats');
                 /** @var StatInstance $instance */
-                $instance = $this->statInstance;
+                $instance = $this->relations['stats'];
                 $this->attributes['stats'] = $instance->data;
             }
         }
@@ -50,8 +55,8 @@ trait HasStats
     // todo: replace with some kind of observer, not sustainable to override the save method
     public function save(array $options = [])
     {
-        if (array_key_exists('stats', $this->attributes) && $this->relationLoaded('statInstance') && $this->statInstance) {
-            $this->statInstance->save();
+        if (array_key_exists('stats', $this->attributes) && isset($this->relations['stats'])) {
+            $this->relations['stats']->save();
             unset($this->attributes['stats']);
         }
 

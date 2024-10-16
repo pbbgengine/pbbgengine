@@ -43,6 +43,17 @@ class StatTest extends TestCase
 
         $user->refresh();
 
+        $this->assertInstanceOf(Collection::class, $user->stats);
         $this->assertEquals($statInstance->data->toArray(), $user->stats->toArray());
+
+        $instance = $user->whereHas('stats', function($query) {
+            $query->where('data->test', '<', 135);
+        })->first();
+        $this->assertNotNull($instance);
+
+        $instance = $user->whereHas('stats', function($query) {
+            $query->where('data->test', '>', 125);
+        })->first();
+        $this->assertNull($instance);
     }
 }
