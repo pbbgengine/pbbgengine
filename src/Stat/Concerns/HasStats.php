@@ -7,7 +7,9 @@ namespace PbbgEngine\Stat\Concerns;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
+use PbbgEngine\Stat\Models\Stat;
 use PbbgEngine\Stat\Models\StatInstance;
+use PbbgEngine\Stat\Validators\Validator;
 
 /**
  * @mixin Model
@@ -36,10 +38,20 @@ trait HasStats
             $this->attributes['stats'] = $this->relations['stats']?->data;
 
             if ($this->attributes['stats'] === null) {
+                $data = [];
+                $defaultValues = Stat::where('model_type', $this::class)->get();
+                foreach ($defaultValues as $defaultValue) {
+                    if ($defaultValue->class) {
+                        /** @var Validator $validator */
+                        $validator = new $defaultValue->class;
+                        $data[$defaultValue->name] = $validator->default();
+                    }
+                }
+
                 $this->stats()->create([
                     'model_type' => self::class,
                     'model_id' => $this->{$this->primaryKey},
-                    'data' => [],
+                    'data' => $data,
                 ]);
                 $this->unsetRelation('stats');
                 $this->load('stats');

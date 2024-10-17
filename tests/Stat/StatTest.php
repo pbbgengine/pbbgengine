@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace PbbgEngine\Tests\Stat;
 
 use Illuminate\Support\Collection;
+use PbbgEngine\Stat\Models\Stat;
 use PbbgEngine\Stat\Models\StatInstance;
 use PbbgEngine\Tests\TestCase;
 use Workbench\App\Models\User;
 use Workbench\Database\Factories\UserFactory;
+use Workbench\App\Game\Stat\Validators\Health;
 
 class StatTest extends TestCase
 {
@@ -55,5 +57,28 @@ class StatTest extends TestCase
             $query->where('data->test', '>', 125);
         })->first();
         $this->assertNull($instance);
+    }
+
+    public function testDefaultStatsCreated(): void
+    {
+
+        $user = UserFactory::new()->create();
+        $this->assertInstanceOf(User::class, $user);
+
+        $stat = Stat::create([
+            'name' => 'health',
+            'model_type' => $user::class,
+            'class' => Health::class,
+        ]);
+        $this->assertInstanceOf(Stat::class, $stat);
+
+        $this->assertFalse(StatInstance::query()->exists());
+
+        $this->assertInstanceOf(Collection::class, $user->stats);
+
+        $this->assertTrue(StatInstance::query()->exists());
+
+        $this->assertEquals(['health' => 100], $user->stats->toArray());
+
     }
 }
