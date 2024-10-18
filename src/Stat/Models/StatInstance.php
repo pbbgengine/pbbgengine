@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use PbbgEngine\Stat\AsValidatedCollection;
+use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\Validators\Validator;
 
 /**
@@ -40,15 +41,15 @@ class StatInstance extends Model
 
     public function save(array $options = []): bool
     {
-        $stats = Stat::where('model_type', $this->model_type)->get();
-        foreach ($stats as $stat) {
-            if ($stat->class) {
+        $stats = app(StatService::class)->stats[$this->model_type] ?? [];
+        foreach ($stats as $stat => $class) {
+            if ($class) {
                 /** @var Validator $validator */
-                $validator = new $stat->class;
-                if (!isset($this->data[$stat->name])) {
-                    $this->data[$stat->name] = $validator->default();
+                $validator = new $class;
+                if (!isset($this->data[$stat])) {
+                    $this->data[$stat] = $validator->default();
                 } else {
-                    $this->data[$stat->name] = $validator->validate($this->data[$stat->name]);
+                    $this->data[$stat] = $validator->validate($this->data[$stat]);
                 }
             }
         }

@@ -42,14 +42,7 @@ class AsValidatedCollection implements Castable
                     return null;
                 }
 
-                $collection = new ValidatedCollection($data);
-
-                // todo: do not perform query here, temporary
-                $collection->stats = Stat::where('model_type', $model->model_type)->get()->mapWithKeys(function($stat) {
-                    return [$stat->name => $stat->class];
-                })->toArray();
-
-                return $collection;
+                return ValidatedCollection::withModel($model->model_type, $data);
             }
 
             /**

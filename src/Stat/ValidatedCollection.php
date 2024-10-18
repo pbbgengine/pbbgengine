@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace PbbgEngine\Stat;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use PbbgEngine\Stat\Models\Stat;
 use PbbgEngine\Stat\Validators\Validator;
 
 /**
@@ -15,10 +15,19 @@ use PbbgEngine\Stat\Validators\Validator;
  */
 class ValidatedCollection extends Collection
 {
+    public string $model;
+
     /**
-     * @var array<string, mixed>
+     * @param string $model
+     * @param array<int|string, mixed> $items
+     * @return ValidatedCollection<int|string, mixed>
      */
-    public array $stats;
+    public static function withModel(string $model, array $items = []): self
+    {
+        $instance = new self($items);
+        $instance->model = $model;
+        return $instance;
+    }
 
     public function __construct($items = [])
     {
@@ -27,9 +36,10 @@ class ValidatedCollection extends Collection
 
     public function offsetSet($key, $value): void
     {
-        if (isset($this->stats[$key])) {
+        $service = app(StatService::class);
+        if (isset($this->model) && isset($service->stats[$this->model][$key])) {
             /** @var Validator $validator */
-            $validator = new $this->stats[$key];
+            $validator = new $service->stats[$this->model][$key];
             $value = $validator->validate($value);
         }
 

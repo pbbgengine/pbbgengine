@@ -7,8 +7,8 @@ namespace PbbgEngine\Stat\Concerns;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
-use PbbgEngine\Stat\Models\Stat;
 use PbbgEngine\Stat\Models\StatInstance;
+use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\Validators\Validator;
 
 /**
@@ -39,12 +39,12 @@ trait HasStats
 
             if ($this->attributes['stats'] === null) {
                 $data = [];
-                $defaultValues = Stat::where('model_type', $this::class)->get();
-                foreach ($defaultValues as $defaultValue) {
-                    if ($defaultValue->class) {
+                $defaultValues = app(StatService::class)->stats[$this::class] ?? [];
+                foreach ($defaultValues as $stat => $class) {
+                    if ($class) {
                         /** @var Validator $validator */
-                        $validator = new $defaultValue->class;
-                        $data[$defaultValue->name] = $validator->default();
+                        $validator = new $class;
+                        $data[$stat] = $validator->default();
                     }
                 }
 

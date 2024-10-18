@@ -17,6 +17,14 @@ class StatServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        $this->app->singleton(StatService::class);
+    }
+
+    /**
      * Publish the stat table migrations.
      */
     public function publishMigrations(): void

@@ -7,6 +7,8 @@ namespace PbbgEngine\Tests\Stat;
 use Illuminate\Support\Collection;
 use PbbgEngine\Stat\Models\Stat;
 use PbbgEngine\Stat\Models\StatInstance;
+use PbbgEngine\Stat\StatService;
+use PbbgEngine\Stat\ValidatedCollection;
 use PbbgEngine\Tests\TestCase;
 use Workbench\App\Models\User;
 use Workbench\Database\Factories\UserFactory;
@@ -61,7 +63,6 @@ class StatTest extends TestCase
 
     public function testDefaultStatsCreated(): void
     {
-
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
 
@@ -95,7 +96,32 @@ class StatTest extends TestCase
         $this->assertEquals(100, $user->stats['health']);
 
         $user->stats->put('health', -50);
-        // $user->save();
+        $user->save();
         $this->assertEquals(0, $user->stats['health']);
+    }
+
+    public function testStatServicePopulated(): void
+    {
+        $statService = new StatService();
+        $this->assertCount(0, $statService->stats);
+
+        $user = UserFactory::new()->create();
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
+        $this->assertEquals([], $user->stats->toArray());
+
+        Stat::create([
+            'name' => 'health',
+            'model_type' => $user::class,
+            'class' => Health::class,
+        ]);
+
+        $statService = new StatService();
+        $this->assertCount(1, $statService->stats);
+        $this->assertNotNull($this);
+
+        $user->save();
+
+        $this->assertEquals(['health' => 100], $user->stats->toArray());
     }
 }
