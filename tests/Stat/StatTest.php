@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace PbbgEngine\Tests\Stat;
 
 use Illuminate\Support\Collection;
-use PbbgEngine\Stat\Models\Stat;
-use PbbgEngine\Stat\Models\StatInstance;
+use PbbgEngine\Stat\Models\Stats;
 use PbbgEngine\Stat\StatService;
+use PbbgEngine\Stat\StatServiceProvider;
 use PbbgEngine\Stat\ValidatedCollection;
 use PbbgEngine\Tests\TestCase;
 use Workbench\App\Models\User;
@@ -16,16 +16,21 @@ use Workbench\App\Game\Stat\Validators\Health;
 
 class StatTest extends TestCase
 {
+    protected function getPackageProviders($app): array
+    {
+        return [StatServiceProvider::class];
+    }
+
     public function testCanGetStats(): void
     {
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
 
-        $this->assertFalse(StatInstance::query()->exists());
+        $this->assertFalse(Stats::query()->exists());
 
         $this->assertInstanceOf(Collection::class, $user->stats);
 
-        $this->assertTrue(StatInstance::query()->exists());
+        $this->assertTrue(Stats::query()->exists());
 
         $this->assertEquals([], $user->stats->toArray());
         $user->stats->put('test', 123);
@@ -33,7 +38,7 @@ class StatTest extends TestCase
 
         $user->save();
 
-        $statInstance = StatInstance::query()
+        $statInstance = Stats::query()
             ->where('model_type', $user::class)
             ->where('model_id', $user->id)
             ->first();
@@ -51,12 +56,12 @@ class StatTest extends TestCase
         $this->assertEquals($statInstance->data->toArray(), $user->stats->toArray());
 
         $instance = $user->whereHas('stats', function($query) {
-            $query->where('data->test', '<', 135);
+            $query->where('stats->test', '<', 135);
         })->first();
         $this->assertNotNull($instance);
 
         $instance = $user->whereHas('stats', function($query) {
-            $query->where('data->test', '>', 125);
+            $query->where('stats->test', '>', 125);
         })->first();
         $this->assertNull($instance);
     }
@@ -66,24 +71,14 @@ class StatTest extends TestCase
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
 
-        $health = Stat::create([
-            'name' => 'health',
-            'model_type' => $user::class,
-            'class' => Health::class,
-        ]);
-        $this->assertInstanceOf(Stat::class, $health);
+        $service = app(StatService::class);
+        $service->stats[$user::class] = ['health' => Health::class];
 
-        $points = Stat::create([
-            'name' => 'points',
-            'model_type' => $user::class,
-        ]);
-        $this->assertInstanceOf(Stat::class, $points);
+        $this->assertFalse(Stats::query()->exists());
 
-        $this->assertFalse(StatInstance::query()->exists());
+        $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
 
-        $this->assertInstanceOf(Collection::class, $user->stats);
-
-        $this->assertTrue(StatInstance::query()->exists());
+        $this->assertTrue(Stats::query()->exists());
 
         // only health, the points stat has no class handler, therefore no default value
         $this->assertEquals(['health' => 100], $user->stats->toArray());
@@ -102,7 +97,7 @@ class StatTest extends TestCase
 
     public function testStatServicePopulated(): void
     {
-        $statService = new StatService();
+        $statService = app(StatService::class);
         $this->assertCount(0, $statService->stats);
 
         $user = UserFactory::new()->create();
@@ -110,14 +105,8 @@ class StatTest extends TestCase
         $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
         $this->assertEquals([], $user->stats->toArray());
 
-        Stat::create([
-            'name' => 'health',
-            'model_type' => $user::class,
-            'class' => Health::class,
-        ]);
-
-        $statService = new StatService();
-        $this->assertCount(1, $statService->stats);
+        $statService->stats[$user::class] = ['health' => Health::class];
+        $this->assertCount(1, $statService->stats[$user::class]);
         $this->assertNotNull($this);
 
         $user->save();

@@ -17,7 +17,7 @@ use PbbgEngine\Stat\Validators\Validator;
  * @property int $model_id
  * @property Collection $data
  */
-class StatInstance extends Model
+class Stats extends Model
 {
     protected $fillable = [
         'model_type',
@@ -32,7 +32,7 @@ class StatInstance extends Model
     /**
      * Get the model that the stats belong to.
      *
-     * @return MorphTo<Model, StatInstance>
+     * @return MorphTo<Model, Stats>
      */
     public function model(): MorphTo
     {

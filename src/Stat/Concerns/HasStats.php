@@ -7,7 +7,7 @@ namespace PbbgEngine\Stat\Concerns;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
-use PbbgEngine\Stat\Models\StatInstance;
+use PbbgEngine\Stat\Models\Stats;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\Validators\Validator;
 
@@ -17,11 +17,11 @@ use PbbgEngine\Stat\Validators\Validator;
 trait HasStats
 {
     /**
-     * @return HasOne<StatInstance>
+     * @return HasOne<Stats>
      */
     public function stats(): HasOne
     {
-        return $this->hasOne(StatInstance::class, 'model_id', $this->primaryKey)
+        return $this->hasOne(Stats::class, 'model_id', $this->primaryKey)
             ->where('model_type', self::class);
     }
 
@@ -55,7 +55,7 @@ trait HasStats
                 ]);
                 $this->unsetRelation('stats');
                 $this->load('stats');
-                /** @var StatInstance $instance */
+                /** @var Stats $instance */
                 $instance = $this->relations['stats'];
                 $this->attributes['stats'] = $instance->data;
             }

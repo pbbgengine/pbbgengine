@@ -15,17 +15,8 @@ return new class extends Migration
     {
         Schema::create('stats', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('model_type');
-            $table->string('class')->nullable();
-            $table->json('data')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('stat_instances', function (Blueprint $table) {
-            $table->id();
             $table->morphs('model');
-            $table->json('data')->nullable();
+            $table->json('stats')->nullable();
             $table->timestamps();
         });
     }
@@ -35,7 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stat_instances');
         Schema::dropIfExists('stats');
     }
 };

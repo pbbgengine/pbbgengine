@@ -8,8 +8,7 @@ use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Database\Eloquent\Model;
-use PbbgEngine\Stat\Models\Stat;
-use PbbgEngine\Stat\Models\StatInstance;
+use PbbgEngine\Stat\Models\Stats;
 
 class AsValidatedCollection implements Castable
 {
@@ -26,7 +25,7 @@ class AsValidatedCollection implements Castable
             public function __construct() {}
 
             /**
-             * @param StatInstance $model
+             * @param Stats $model
              * @param array<string, mixed> $attributes
              * @return ValidatedCollection<array-key, mixed>|null
              */
@@ -46,7 +45,7 @@ class AsValidatedCollection implements Castable
             }
 
             /**
-             * @param StatInstance $model
+             * @param Stats $model
              * @param array<string, mixed> $attributes
              * @return array<string, mixed>
              */
