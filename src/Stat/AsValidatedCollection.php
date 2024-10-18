@@ -7,24 +7,30 @@ namespace PbbgEngine\Stat;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Casts\Json;
-use InvalidArgumentException;
+use Illuminate\Database\Eloquent\Model;
 use PbbgEngine\Stat\Models\Stat;
+use PbbgEngine\Stat\Models\StatInstance;
 
 class AsValidatedCollection implements Castable
 {
     /**
      * Get the caster class to use when casting from / to this cast target.
      *
-     * @param  array  $arguments
-     * @return CastsAttributes<ValidatedCollection<array-key, mixed>, iterable>
+     * @param  array<int, mixed>  $arguments
+     * @return CastsAttributes<ValidatedCollection<string, mixed>, iterable<string, mixed>>
      */
     public static function castUsing(array $arguments)
     {
-        return new class($arguments) implements CastsAttributes
+        return new class() implements CastsAttributes
         {
-            public function __construct(protected array $arguments) {}
+            public function __construct() {}
 
-            public function get($model, $key, $value, $attributes)
+            /**
+             * @param StatInstance $model
+             * @param array<string, mixed> $attributes
+             * @return ValidatedCollection<array-key, mixed>|null
+             */
+            public function get(Model $model, string $key, mixed $value, array $attributes)
             {
                 if (! isset($attributes[$key])) {
                     return null;
@@ -46,7 +52,12 @@ class AsValidatedCollection implements Castable
                 return $collection;
             }
 
-            public function set($model, $key, $value, $attributes)
+            /**
+             * @param StatInstance $model
+             * @param array<string, mixed> $attributes
+             * @return array<string, mixed>
+             */
+            public function set(Model $model, string $key, mixed $value, array $attributes)
             {
                 return [$key => Json::encode($value)];
             }

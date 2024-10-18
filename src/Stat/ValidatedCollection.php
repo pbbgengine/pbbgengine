@@ -4,12 +4,20 @@ declare(strict_types=1);
 
 namespace PbbgEngine\Stat;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use PbbgEngine\Stat\Models\Stat;
+use PbbgEngine\Stat\Validators\Validator;
 
+/**
+ * @template TKey of array-key
+ * @template TValue
+ * @extends Collection<TKey, TValue>
+ */
 class ValidatedCollection extends Collection
 {
+    /**
+     * @var array<string, mixed>
+     */
     public array $stats;
 
     public function __construct($items = [])
@@ -20,7 +28,9 @@ class ValidatedCollection extends Collection
     public function offsetSet($key, $value): void
     {
         if (isset($this->stats[$key])) {
-            $value = (new $this->stats[$key])->validate($value);
+            /** @var Validator $validator */
+            $validator = new $this->stats[$key];
+            $value = $validator->validate($value);
         }
 
         parent::offsetSet($key, $value);
