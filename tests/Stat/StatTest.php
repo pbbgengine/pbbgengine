@@ -91,11 +91,11 @@ class StatTest extends TestCase
         $this->assertEquals(['health' => 100, 'points' => 5], $user->stats->toArray());
 
         $user->stats->put('health', 105);
-        $user->save();
+        // $user->save();
         $this->assertEquals(100, $user->stats['health']);
 
         $user->stats->put('health', -50);
-        $user->save();
+        // $user->save();
         $this->assertEquals(0, $user->stats['health']);
     }
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace PbbgEngine\Stat\Models;
 
-use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
+use PbbgEngine\Stat\AsValidatedCollection;
 use PbbgEngine\Stat\Validators\Validator;
 
 /**
@@ -25,7 +25,7 @@ class StatInstance extends Model
     ];
 
     protected $casts = [
-        'data' => AsCollection::class,
+        'data' => AsValidatedCollection::class,
     ];
 
     /**
