@@ -67,7 +67,7 @@ trait HasStats
     // todo: replace with some kind of observer, not sustainable to override the save method
     public function save(array $options = [])
     {
-        if (array_key_exists('stats', $this->attributes) && isset($this->relations['stats'])) {
+        if (isset($this->relations['stats'])) {
             $this->relations['stats']->save();
             unset($this->attributes['stats']);
         }

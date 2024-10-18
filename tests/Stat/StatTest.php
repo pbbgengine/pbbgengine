@@ -65,12 +65,18 @@ class StatTest extends TestCase
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
 
-        $stat = Stat::create([
+        $health = Stat::create([
             'name' => 'health',
             'model_type' => $user::class,
             'class' => Health::class,
         ]);
-        $this->assertInstanceOf(Stat::class, $stat);
+        $this->assertInstanceOf(Stat::class, $health);
+
+        $points = Stat::create([
+            'name' => 'points',
+            'model_type' => $user::class,
+        ]);
+        $this->assertInstanceOf(Stat::class, $points);
 
         $this->assertFalse(StatInstance::query()->exists());
 
@@ -78,7 +84,18 @@ class StatTest extends TestCase
 
         $this->assertTrue(StatInstance::query()->exists());
 
+        // only health, the points stat has no class handler, therefore no default value
         $this->assertEquals(['health' => 100], $user->stats->toArray());
 
+        $user->stats->put('points', 5);
+        $this->assertEquals(['health' => 100, 'points' => 5], $user->stats->toArray());
+
+        $user->stats->put('health', 105);
+        $user->save();
+        $this->assertEquals(100, $user->stats['health']);
+
+        $user->stats->put('health', -50);
+        $user->save();
+        $this->assertEquals(0, $user->stats['health']);
     }
 }

@@ -6,5 +6,6 @@ namespace PbbgEngine\Stat\Validators;
 
 interface Validator
 {
+    public function validate(mixed $value): mixed;
     public function default(): mixed;
 }
