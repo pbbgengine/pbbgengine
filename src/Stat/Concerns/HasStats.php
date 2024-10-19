@@ -56,7 +56,7 @@ trait HasStats
                     if (!is_subclass_of($class, Validator::class)) {
                         throw new InvalidValidator($class);
                     }
-                    $validator = new $class;
+                    $validator = new $class($this);
                     $data[$stat] = $validator->default();
                 }
 

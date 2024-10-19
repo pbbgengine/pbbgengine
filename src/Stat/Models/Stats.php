@@ -47,7 +47,7 @@ class Stats extends Model
             if (!is_subclass_of($class, Validator::class)) {
                 throw new InvalidValidator($class);
             }
-            $validator = new $class;
+            $validator = new $class($this->model);
             if (!isset($this->stats[$stat])) {
                 $this->stats[$stat] = $validator->default();
             } else {

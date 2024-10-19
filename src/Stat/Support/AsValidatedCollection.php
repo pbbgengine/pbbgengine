@@ -41,7 +41,7 @@ class AsValidatedCollection implements Castable
                     return null;
                 }
 
-                return ValidatedCollection::withModel($model->model_type, $data);
+                return ValidatedCollection::withModel($model->model, $data);
             }
 
             /**

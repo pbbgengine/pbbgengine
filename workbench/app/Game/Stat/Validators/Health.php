@@ -6,7 +6,7 @@ namespace Workbench\App\Game\Stat\Validators;
 
 use PbbgEngine\Stat\Validators\Validator;
 
-class Health implements Validator
+class Health extends Validator
 {
     public int $min = 0;
     public int $max = 100;
