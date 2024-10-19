@@ -7,10 +7,9 @@ namespace PbbgEngine\Stat\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
-use PbbgEngine\Stat\Exceptions\InvalidValidator;
+use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\Support\AsValidatedCollection;
-use PbbgEngine\Stat\Validators\Validator;
 
 /**
  * @property int $id
@@ -46,7 +45,7 @@ class Stats extends Model
         $stats = $service->handlers[$this->model_type] ?? [];
         foreach ($stats as $stat => $class) {
             if (!is_subclass_of($class, $service->handler)) {
-                throw new InvalidValidator($class);
+                throw new InvalidAttributeHandler($class);
             }
             $validator = new $class($this->model);
             if (!isset($this->stats[$stat])) {

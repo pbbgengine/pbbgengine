@@ -12,8 +12,8 @@ class StatsProxyObserver
      * Saves the stats for a model.
      */
     public function saving(Model $model): void {
-        if (method_exists($model, 'saveStats')) {
-            $model->saveStats();
+        if (method_exists($model, 'saveDynamicRelation')) {
+            $model->saveDynamicRelation('stats');
         }
     }
 }

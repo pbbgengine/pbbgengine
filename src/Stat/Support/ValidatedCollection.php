@@ -6,9 +6,8 @@ namespace PbbgEngine\Stat\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use PbbgEngine\Stat\Exceptions\InvalidValidator;
+use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Stat\StatService;
-use PbbgEngine\Stat\Validators\Validator;
 
 /**
  * @template TKey of array-key
@@ -44,14 +43,14 @@ class ValidatedCollection extends Collection
      *
      * @param TKey $key
      * @param TValue $value
-     * @throws InvalidValidator
+     * @throws InvalidAttributeHandler
      */
     public function offsetSet($key, $value): void
     {
         $service = app(StatService::class);
         if (isset($this->model) && isset($service->handlers[$this->model::class][$key])) {
             if (!is_subclass_of($service->handlers[$this->model::class][$key], $service->handler)) {
-                throw new InvalidValidator($service->handlers[$this->model::class][$key]);
+                throw new InvalidAttributeHandler($service->handlers[$this->model::class][$key]);
             }
             $validator = new $service->handlers[$this->model::class][$key]($this->model);
             $value = $validator->validate($value);

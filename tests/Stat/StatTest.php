@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PbbgEngine\Tests\Stat;
 
 use Illuminate\Support\Collection;
-use PbbgEngine\Stat\Exceptions\InvalidValidator;
+use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Stat\Models\Stats;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\StatServiceProvider;
@@ -128,7 +128,7 @@ class StatTest extends TestCase
         $this->assertCount(1, $service->booted);
     }
 
-    public function testInvalidValidator(): void
+    public function testInvalidAttributeHandler(): void
     {
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
@@ -140,6 +140,6 @@ class StatTest extends TestCase
             $service->handlers[$user::class] = ['energy' => 'invalid'];
             // @phpstan-ignore-next-line
             $user->stats; // triggers the observer
-        }, InvalidValidator::class);
+        }, InvalidAttributeHandler::class);
     }
 }
