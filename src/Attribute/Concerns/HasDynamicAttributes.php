@@ -6,8 +6,11 @@ namespace PbbgEngine\Attribute\Concerns;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use PbbgEngine\Attribute\AttributeManager;
+use PbbgEngine\Attribute\AttributeService;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
-use PbbgEngine\Stat\StatService;
+use PbbgEngine\Attribute\Exceptions\InvalidAttributeService;
+use PbbgEngine\Stat\Validators\Validator;
 
 /**
  * @mixin Model
@@ -17,13 +20,12 @@ trait HasDynamicAttributes
     /**
      * @param $key
      * @return mixed
-     * @throws InvalidAttributeHandler
+     * @throws InvalidAttributeHandler|InvalidAttributeService
      */
     public function __get($key): mixed
     {
-        // todo: get attribute types mapped by model type
-        // from property in attribute service
-        if (in_array($key, ['stats', 'resources'])) {
+        $manager = app(AttributeManager::class);
+        if (isset($manager->types[$key]) && method_exists($this, $key)) {
             return $this->getDynamicAttribute($key);
         }
 
@@ -35,13 +37,18 @@ trait HasDynamicAttributes
      *
      * @param string $relation
      * @return Collection<string, mixed|null>
-     * @throws InvalidAttributeHandler
+     * @throws InvalidAttributeHandler|InvalidAttributeService
      */
     public function getDynamicAttribute(string $relation): Collection
     {
-        // todo: get service by relation from property in attribute service
-        /** @var StatService $service */
-        $service = app(StatService::class);
+        $manager = app(AttributeManager::class);
+
+        if (!isset($manager->types[$relation])) {
+            throw new InvalidAttributeService($this::class);
+        }
+
+        /** @var AttributeService<Validator, object> $service */
+        $service = app($manager->types[$relation]);
 
         if (!in_array(self::class, $service->booted)) {
             $service->bootObserver($this);
@@ -62,6 +69,7 @@ trait HasDynamicAttributes
                     if (!is_subclass_of($class, $service->handler)) {
                         throw new InvalidAttributeHandler($class);
                     }
+                    /** @var Validator $validator */
                     $validator = new $class($this);
                     $data[$stat] = $validator->default();
                 }

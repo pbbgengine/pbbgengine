@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PbbgEngine\Tests\Stat;
 
 use Illuminate\Support\Collection;
+use PbbgEngine\Attribute\AttributeServiceProvider;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Stat\Models\Stats;
 use PbbgEngine\Stat\StatService;
@@ -19,7 +20,10 @@ class StatTest extends TestCase
 {
     protected function getPackageProviders($app): array
     {
-        return [StatServiceProvider::class];
+        return [
+            AttributeServiceProvider::class,
+            StatServiceProvider::class,
+        ];
     }
 
     public function testCanGetStats(): void

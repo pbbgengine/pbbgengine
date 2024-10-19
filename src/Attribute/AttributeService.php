@@ -22,7 +22,7 @@ class AttributeService
     public array $handlers = [];
 
     /**
-     * The models that have had their stat observers booted.
+     * The models that have had their attribute observers booted.
      *
      * @var array<class-string<Model>>
      */
