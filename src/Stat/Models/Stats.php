@@ -7,6 +7,7 @@ namespace PbbgEngine\Stat\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
+use PbbgEngine\Stat\Exceptions\InvalidValidator;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\Support\AsValidatedCollection;
 use PbbgEngine\Stat\Validators\Validator;
@@ -43,13 +44,14 @@ class Stats extends Model
     {
         $stats = app(StatService::class)->stats[$this->model_type] ?? [];
         foreach ($stats as $stat => $class) {
-            if (is_subclass_of($class, Validator::class)) {
-                $validator = new $class;
-                if (!isset($this->stats[$stat])) {
-                    $this->stats[$stat] = $validator->default();
-                } else {
-                    $this->stats[$stat] = $validator->validate($this->stats[$stat]);
-                }
+            if (!is_subclass_of($class, Validator::class)) {
+                throw new InvalidValidator($class);
+            }
+            $validator = new $class;
+            if (!isset($this->stats[$stat])) {
+                $this->stats[$stat] = $validator->default();
+            } else {
+                $this->stats[$stat] = $validator->validate($this->stats[$stat]);
             }
         }
         return parent::save($options);

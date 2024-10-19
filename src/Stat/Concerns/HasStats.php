@@ -7,6 +7,7 @@ namespace PbbgEngine\Stat\Concerns;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
+use PbbgEngine\Stat\Exceptions\InvalidValidator;
 use PbbgEngine\Stat\Models\Stats;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\Validators\Validator;
@@ -52,10 +53,11 @@ trait HasStats
                 $data = [];
                 $defaultValues = app(StatService::class)->stats[$this::class] ?? [];
                 foreach ($defaultValues as $stat => $class) {
-                    if (is_subclass_of($class, Validator::class)) {
-                        $validator = new $class;
-                        $data[$stat] = $validator->default();
+                    if (!is_subclass_of($class, Validator::class)) {
+                        throw new InvalidValidator($class);
                     }
+                    $validator = new $class;
+                    $data[$stat] = $validator->default();
                 }
 
                 $this->stats()->create([

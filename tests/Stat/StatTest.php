@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PbbgEngine\Tests\Stat;
 
 use Illuminate\Support\Collection;
+use PbbgEngine\Stat\Exceptions\InvalidValidator;
 use PbbgEngine\Stat\Models\Stats;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\StatServiceProvider;
@@ -125,6 +126,21 @@ class StatTest extends TestCase
         $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
 
         $this->assertCount(1, $service->booted);
+    }
 
+    public function testInvalidValidator(): void
+    {
+        $user = UserFactory::new()->create();
+        $this->assertInstanceOf(User::class, $user);
+
+        $service = app(StatService::class);
+        // @phpstan-ignore-next-line
+        $service->stats[$user::class] = ['energy' => 'invalid'];
+
+        $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
+
+        $this->assertThrows(function() use ($user) {
+            $user->stats->put('energy', 10);
+        }, InvalidValidator::class);
     }
 }

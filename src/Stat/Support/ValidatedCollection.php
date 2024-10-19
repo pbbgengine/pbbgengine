@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PbbgEngine\Stat\Support;
 
 use Illuminate\Support\Collection;
+use PbbgEngine\Stat\Exceptions\InvalidValidator;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\Validators\Validator;
 
@@ -47,7 +48,9 @@ class ValidatedCollection extends Collection
     {
         $service = app(StatService::class);
         if (isset($this->model) && isset($service->stats[$this->model][$key])) {
-            /** @var Validator $validator */
+            if (!is_subclass_of($service->stats[$this->model][$key], Validator::class)) {
+                throw new InvalidValidator($service->stats[$this->model][$key]);
+            }
             $validator = new $service->stats[$this->model][$key];
             $value = $validator->validate($value);
         }
