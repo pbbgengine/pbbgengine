@@ -44,16 +44,16 @@ class StatTest extends TestCase
             ->first();
 
         $this->assertNotNull($statInstance);
-        $this->assertEquals($statInstance->data->toArray(), $user->stats->toArray());
+        $this->assertEquals($statInstance->stats->toArray(), $user->stats->toArray());
 
-        $statInstance->data = $statInstance->data->map(fn ($item) => $item + 1);
-        $this->assertEquals(['test' => 124], $statInstance->data->toArray());
+        $statInstance->stats = $statInstance->stats->map(fn ($item) => $item + 1);
+        $this->assertEquals(['test' => 124], $statInstance->stats->toArray());
         $statInstance->save();
 
         $user->refresh();
 
         $this->assertInstanceOf(Collection::class, $user->stats);
-        $this->assertEquals($statInstance->data->toArray(), $user->stats->toArray());
+        $this->assertEquals($statInstance->stats->toArray(), $user->stats->toArray());
 
         $instance = $user->whereHas('stats', function($query) {
             $query->where('stats->test', '<', 135);

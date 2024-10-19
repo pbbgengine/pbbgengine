@@ -35,7 +35,7 @@ trait HasStats
                 $this->load('stats');
             }
 
-            $this->attributes['stats'] = $this->relations['stats']?->data;
+            $this->attributes['stats'] = $this->relations['stats']?->stats;
 
             if ($this->attributes['stats'] === null) {
                 $data = [];
@@ -51,13 +51,13 @@ trait HasStats
                 $this->stats()->create([
                     'model_type' => self::class,
                     'model_id' => $this->{$this->primaryKey},
-                    'data' => $data,
+                    'stats' => $data,
                 ]);
                 $this->unsetRelation('stats');
                 $this->load('stats');
                 /** @var Stats $instance */
                 $instance = $this->relations['stats'];
-                $this->attributes['stats'] = $instance->data;
+                $this->attributes['stats'] = $instance->stats;
             }
         }
 

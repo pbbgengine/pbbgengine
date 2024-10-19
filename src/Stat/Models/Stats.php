@@ -22,11 +22,11 @@ class Stats extends Model
     protected $fillable = [
         'model_type',
         'model_id',
-        'data',
+        'stats',
     ];
 
     protected $casts = [
-        'data' => AsValidatedCollection::class,
+        'stats' => AsValidatedCollection::class,
     ];
 
     /**
@@ -46,10 +46,10 @@ class Stats extends Model
             if ($class) {
                 /** @var Validator $validator */
                 $validator = new $class;
-                if (!isset($this->data[$stat])) {
-                    $this->data[$stat] = $validator->default();
+                if (!isset($this->stats[$stat])) {
+                    $this->stats[$stat] = $validator->default();
                 } else {
-                    $this->data[$stat] = $validator->validate($this->data[$stat]);
+                    $this->stats[$stat] = $validator->validate($this->stats[$stat]);
                 }
             }
         }
