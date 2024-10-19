@@ -44,15 +44,16 @@ class ValidatedCollection extends Collection
      *
      * @param TKey $key
      * @param TValue $value
+     * @throws InvalidValidator
      */
     public function offsetSet($key, $value): void
     {
         $service = app(StatService::class);
-        if (isset($this->model) && isset($service->stats[$this->model::class][$key])) {
-            if (!is_subclass_of($service->stats[$this->model::class][$key], Validator::class)) {
-                throw new InvalidValidator($service->stats[$this->model::class][$key]);
+        if (isset($this->model) && isset($service->handlers[$this->model::class][$key])) {
+            if (!is_subclass_of($service->handlers[$this->model::class][$key], $service->handler)) {
+                throw new InvalidValidator($service->handlers[$this->model::class][$key]);
             }
-            $validator = new $service->stats[$this->model::class][$key]($this->model);
+            $validator = new $service->handlers[$this->model::class][$key]($this->model);
             $value = $validator->validate($value);
         }
 

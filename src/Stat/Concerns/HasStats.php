@@ -51,9 +51,10 @@ trait HasStats
 
             if ($this->attributes['stats'] === null) {
                 $data = [];
-                $defaultValues = app(StatService::class)->stats[$this::class] ?? [];
+                $service = app(StatService::class);
+                $defaultValues = $service->handlers[$this::class] ?? [];
                 foreach ($defaultValues as $stat => $class) {
-                    if (!is_subclass_of($class, Validator::class)) {
+                    if (!is_subclass_of($class, $service->handler)) {
                         throw new InvalidValidator($class);
                     }
                     $validator = new $class($this);

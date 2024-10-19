@@ -4,35 +4,26 @@ declare(strict_types=1);
 
 namespace PbbgEngine\Stat;
 
-use Illuminate\Database\Eloquent\Model;
+use PbbgEngine\Attribute\AttributeService;
 use PbbgEngine\Stat\Observers\StatsProxyObserver;
 use PbbgEngine\Stat\Validators\Validator;
 
-class StatService
+/**
+ * @extends AttributeService<Validator, StatsProxyObserver>
+ */
+class StatService extends AttributeService
 {
     /**
-     * The stats applied to each model.
+     * The stat handlers must be of type Validator.
      *
-     * e.g. [User::class => ['health' => HealthValidator::class]]
-     *
-     * @var array<class-string<Model>, array<string, class-string<Validator>>>
+     * @var class-string<Validator>
      */
-    public array $stats = [];
+    public string $handler = Validator::class;
 
     /**
-     * The models that have had their stat observers booted.
+     * The stat observer to use.
      *
-     * @var array<class-string<Model>>
+     * @var class-string<StatsProxyObserver>
      */
-    public array $booted = [];
-
-    /**
-     * Boots the stat observer for the given model.
-     * Called when stats are accessed for the first time on a HasStats model.
-     */
-    public function bootObserver(Model $model): void
-    {
-        $model::observe(StatsProxyObserver::class);
-        $this->booted[] = $model::class;
-    }
+    public string $observer = StatsProxyObserver::class;
 }

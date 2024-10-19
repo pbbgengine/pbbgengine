@@ -73,7 +73,7 @@ class StatTest extends TestCase
         $this->assertInstanceOf(User::class, $user);
 
         $service = app(StatService::class);
-        $service->stats[$user::class] = ['health' => Health::class];
+        $service->handlers[$user::class] = ['health' => Health::class];
 
         $this->assertFalse(Stats::query()->exists());
 
@@ -99,15 +99,15 @@ class StatTest extends TestCase
     public function testStatServicePopulated(): void
     {
         $statService = app(StatService::class);
-        $this->assertCount(0, $statService->stats);
+        $this->assertCount(0, $statService->handlers);
 
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
         $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
         $this->assertEquals([], $user->stats->toArray());
 
-        $statService->stats[$user::class] = ['health' => Health::class];
-        $this->assertCount(1, $statService->stats[$user::class]);
+        $statService->handlers[$user::class] = ['health' => Health::class];
+        $this->assertCount(1, $statService->handlers[$user::class]);
         $this->assertNotNull($this);
 
         $user->save();
@@ -137,7 +137,7 @@ class StatTest extends TestCase
         $this->assertThrows(function() use ($user) {
             $service = app(StatService::class);
             // @phpstan-ignore-next-line
-            $service->stats[$user::class] = ['energy' => 'invalid'];
+            $service->handlers[$user::class] = ['energy' => 'invalid'];
             // @phpstan-ignore-next-line
             $user->stats; // triggers the observer
         }, InvalidValidator::class);

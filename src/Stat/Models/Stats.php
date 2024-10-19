@@ -42,9 +42,10 @@ class Stats extends Model
 
     public function save(array $options = []): bool
     {
-        $stats = app(StatService::class)->stats[$this->model_type] ?? [];
+        $service = app(StatService::class);
+        $stats = $service->handlers[$this->model_type] ?? [];
         foreach ($stats as $stat => $class) {
-            if (!is_subclass_of($class, Validator::class)) {
+            if (!is_subclass_of($class, $service->handler)) {
                 throw new InvalidValidator($class);
             }
             $validator = new $class($this->model);
