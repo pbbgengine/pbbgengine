@@ -15,7 +15,7 @@ use PbbgEngine\Stat\Validators\Validator;
  * @property int $id
  * @property string $model_type
  * @property int $model_id
- * @property Collection $data
+ * @property Collection $stats
  */
 class Stats extends Model
 {
@@ -43,8 +43,7 @@ class Stats extends Model
     {
         $stats = app(StatService::class)->stats[$this->model_type] ?? [];
         foreach ($stats as $stat => $class) {
-            if ($class) {
-                /** @var Validator $validator */
+            if (is_subclass_of($class, Validator::class)) {
                 $validator = new $class;
                 if (!isset($this->stats[$stat])) {
                     $this->stats[$stat] = $validator->default();

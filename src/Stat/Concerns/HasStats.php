@@ -30,6 +30,12 @@ trait HasStats
      */
     public function getStatsAttribute(): Collection
     {
+        /** @var StatService $service */
+        $service = app(StatService::class);
+        if (!in_array(self::class, $service->booted)) {
+            $service->bootObserver($this);
+        }
+
         if (!isset($this->attributes['stats'])) {
             if (!isset($this->relations['stats'])) {
                 $this->load('stats');
@@ -41,8 +47,7 @@ trait HasStats
                 $data = [];
                 $defaultValues = app(StatService::class)->stats[$this::class] ?? [];
                 foreach ($defaultValues as $stat => $class) {
-                    if ($class) {
-                        /** @var Validator $validator */
+                    if (is_subclass_of($class, Validator::class)) {
                         $validator = new $class;
                         $data[$stat] = $validator->default();
                     }
@@ -64,14 +69,11 @@ trait HasStats
         return $this->attributes['stats'];
     }
 
-    // todo: replace with some kind of observer, not sustainable to override the save method
-    public function save(array $options = [])
+    public function saveStats(): void
     {
         if (isset($this->relations['stats'])) {
             $this->relations['stats']->save();
-            unset($this->attributes['stats']);
         }
-
-        return parent::save($options);
+        unset($this->attributes['stats']);
     }
 }
