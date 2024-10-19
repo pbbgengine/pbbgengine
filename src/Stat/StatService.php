@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PbbgEngine\Stat;
 
 use Illuminate\Database\Eloquent\Model;
+use PbbgEngine\Stat\Observers\StatsProxyObserver;
 use PbbgEngine\Stat\Validators\Validator;
 
 class StatService
@@ -31,7 +32,7 @@ class StatService
      */
     public function bootObserver(Model $model): void
     {
-        $model::observe(StatsObserver::class);
+        $model::observe(StatsProxyObserver::class);
         $this->booted[] = $model::class;
     }
 }

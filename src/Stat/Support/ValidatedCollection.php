@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace PbbgEngine\Stat;
+namespace PbbgEngine\Stat\Support;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\Validators\Validator;
 
 /**
@@ -18,6 +18,9 @@ class ValidatedCollection extends Collection
     public string $model;
 
     /**
+     * Creates a ValidatedCollection instance with the
+     * model type to validate the stats against.
+     *
      * @param string $model
      * @param array<int|string, mixed> $items
      * @return ValidatedCollection<int|string, mixed>

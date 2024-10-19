@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PbbgEngine\Stat;
+namespace PbbgEngine\Stat\Support;
 
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;

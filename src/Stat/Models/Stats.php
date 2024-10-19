@@ -7,8 +7,8 @@ namespace PbbgEngine\Stat\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
-use PbbgEngine\Stat\AsValidatedCollection;
 use PbbgEngine\Stat\StatService;
+use PbbgEngine\Stat\Support\AsValidatedCollection;
 use PbbgEngine\Stat\Validators\Validator;
 
 /**

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace PbbgEngine\Stat;
+namespace PbbgEngine\Stat\Observers;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StatsObserver
+class StatsProxyObserver
 {
     /**
      * Saves the stats for a model.

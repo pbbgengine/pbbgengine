@@ -8,11 +8,11 @@ use Illuminate\Support\Collection;
 use PbbgEngine\Stat\Models\Stats;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\StatServiceProvider;
-use PbbgEngine\Stat\ValidatedCollection;
+use PbbgEngine\Stat\Support\ValidatedCollection;
 use PbbgEngine\Tests\TestCase;
+use Workbench\App\Game\Stat\Validators\Health;
 use Workbench\App\Models\User;
 use Workbench\Database\Factories\UserFactory;
-use Workbench\App\Game\Stat\Validators\Health;
 
 class StatTest extends TestCase
 {
@@ -112,5 +112,19 @@ class StatTest extends TestCase
         $user->save();
 
         $this->assertEquals(['health' => 100], $user->stats->toArray());
+    }
+
+    public function testObserverGetsBooted(): void
+    {
+        /** @var StatService $service */
+        $service = app(StatService::class);
+
+        $this->assertCount(0, $service->booted);
+
+        $user = UserFactory::new()->createOne();
+        $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
+
+        $this->assertCount(1, $service->booted);
+
     }
 }
