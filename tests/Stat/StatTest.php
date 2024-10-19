@@ -133,14 +133,13 @@ class StatTest extends TestCase
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
 
-        $service = app(StatService::class);
-        // @phpstan-ignore-next-line
-        $service->stats[$user::class] = ['energy' => 'invalid'];
-
-        $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
 
         $this->assertThrows(function() use ($user) {
-            $user->stats->put('energy', 10);
+            $service = app(StatService::class);
+            // @phpstan-ignore-next-line
+            $service->stats[$user::class] = ['energy' => 'invalid'];
+            // @phpstan-ignore-next-line
+            $user->stats; // triggers the observer
         }, InvalidValidator::class);
     }
 }
