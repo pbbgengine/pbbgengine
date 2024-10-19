@@ -34,6 +34,12 @@ class ValidatedCollection extends Collection
         parent::__construct($items);
     }
 
+    /**
+     * Performs validation on the value before setting it in the collection.
+     *
+     * @param TKey $key
+     * @param TValue $value
+     */
     public function offsetSet($key, $value): void
     {
         $service = app(StatService::class);

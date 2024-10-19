@@ -17,6 +17,8 @@ use PbbgEngine\Stat\Validators\Validator;
 trait HasStats
 {
     /**
+     * Get the stats relation for the model.
+     *
      * @return HasOne<Stats>
      */
     public function stats(): HasOne
@@ -26,6 +28,9 @@ trait HasStats
     }
 
     /**
+     * Get the stats attribute for the model from the associated stats instance.
+     * Creates the stats instance and populates it if it does not exist.
+     *
      * @return Collection<string, mixed|null>
      */
     public function getStatsAttribute(): Collection
@@ -69,6 +74,10 @@ trait HasStats
         return $this->attributes['stats'];
     }
 
+    /**
+     * Saves the stats for the model.
+     * Unassigns the stats attribute from the model.
+     */
     public function saveStats(): void
     {
         if (isset($this->relations['stats'])) {
