@@ -41,7 +41,7 @@ class AsValidatedAttributes implements Castable
                     return null;
                 }
 
-                return ValidatedAttributes::withModel($model->model, $data);
+                return ValidatedAttributes::withModel($model, $data);
             }
 
             /**

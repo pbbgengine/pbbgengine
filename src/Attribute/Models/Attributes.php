@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Attributes extends Model
 {
     /**
-     * Get the model that the stats belong to.
+     * Get the model that the attributes belong to.
      *
      * @return MorphTo<Model, Attributes>
      */
