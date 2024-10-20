@@ -7,7 +7,7 @@ namespace PbbgEngine\Attribute\Observers;
 use PbbgEngine\Attribute\AttributeManager;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Attribute\Models\Attributes;
-use PbbgEngine\Stat\Validators\Validator;
+use PbbgEngine\Attribute\Validators\Validator;
 
 class AttributeObserver
 {

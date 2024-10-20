@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace PbbgEngine\Attribute;
 
 use Illuminate\Database\Eloquent\Model;
+use PbbgEngine\Attribute\Observers\AttributeProxyObserver;
+use PbbgEngine\Attribute\Validators\Validator;
 
-/**
- * @template THandler of object
- * @template TObserver of object
- */
 class AttributeService
 {
     /**
@@ -17,7 +15,7 @@ class AttributeService
      *
      * e.g. [User::class => ['health' => HealthValidator::class]]
      *
-     * @var array<class-string<Model>, array<string, class-string<THandler>>> $handlers
+     * @var array<class-string<Model>, array<string, class-string<Validator>>> $handlers
      */
     public array $handlers = [];
 
@@ -31,16 +29,16 @@ class AttributeService
     /**
      * The class or interface that the attribute handlers must implement.
      *
-     * @var class-string<THandler>
+     * @var class-string<Validator>
      */
-    public string $handler;
+    public string $handler = Validator::class;
 
     /**
      * The class name of the attribute observer.
      *
-     * @var class-string<TObserver>
+     * @var class-string<AttributeProxyObserver>
      */
-    public string $observer;
+    public string $observer = AttributeProxyObserver::class;
 
     /**
      * Boots the attribute observer for the given model.

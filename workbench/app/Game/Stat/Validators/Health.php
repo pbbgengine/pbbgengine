@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Workbench\App\Game\Stat\Validators;
 
-use PbbgEngine\Stat\Validators\Validator;
+use PbbgEngine\Attribute\Validators\Validator;
 
 class Health extends Validator
 {

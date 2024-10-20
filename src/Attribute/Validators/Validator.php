@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PbbgEngine\Stat\Validators;
+namespace PbbgEngine\Attribute\Validators;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,7 +20,7 @@ abstract class Validator
     abstract public function validate(mixed $value): mixed;
 
     /**
-     * Returns the default value for the stat.
+     * Returns the default value for the attribute.
      */
     abstract public function default(): mixed;
 }

@@ -18,7 +18,9 @@ class StatServiceProvider extends ServiceProvider
     {
         $this->publishMigrations();
 
-        // todo: automate this
+        // todo: make this configurable
+        $manager = app(AttributeManager::class);
+        $manager->types['stats'] = StatService::class;
         Stats::observe(AttributeObserver::class);
     }
 
@@ -28,10 +30,6 @@ class StatServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(StatService::class);
-
-        // todo: make this configurable
-        $manager = app(AttributeManager::class);
-        $manager->types['stats'] = StatService::class;
     }
 
     /**

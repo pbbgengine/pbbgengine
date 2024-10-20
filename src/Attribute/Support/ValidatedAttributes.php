@@ -10,7 +10,7 @@ use PbbgEngine\Attribute\AttributeManager;
 use PbbgEngine\Attribute\AttributeService;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Attribute\Models\Attributes;
-use PbbgEngine\Stat\Validators\Validator;
+use PbbgEngine\Attribute\Validators\Validator;
 
 /**
  * @template TKey of array-key
@@ -53,7 +53,7 @@ class ValidatedAttributes extends Collection
     public function offsetSet($key, $value): void
     {
         $manager = app(AttributeManager::class);
-        /** @var AttributeService<Validator, object> $service */
+        /** @var AttributeService $service */
         $service = app($manager->types[$this->attributes->getTable()]);
         if (isset($this->model) && isset($service->handlers[$this->model::class][$key])) {
             if (!is_subclass_of($service->handlers[$this->model::class][$key], $service->handler)) {

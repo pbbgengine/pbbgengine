@@ -10,7 +10,7 @@ use PbbgEngine\Attribute\AttributeManager;
 use PbbgEngine\Attribute\AttributeService;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeService;
-use PbbgEngine\Stat\Validators\Validator;
+use PbbgEngine\Attribute\Validators\Validator;
 
 /**
  * @mixin Model
@@ -47,7 +47,7 @@ trait HasDynamicAttributes
             throw new InvalidAttributeService($this::class);
         }
 
-        /** @var AttributeService<Validator, object> $service */
+        /** @var AttributeService $service */
         $service = app($manager->types[$relation]);
 
         if (!in_array(self::class, $service->booted)) {
