@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use PbbgEngine\Item\Concerns\HasItems;
 use PbbgEngine\Quest\Concerns\HasQuests;
+use PbbgEngine\Resource\Concerns\HasResources;
 use PbbgEngine\Stat\Concerns\HasStats;
 use Workbench\Database\Factories\UserFactory;
 
@@ -16,7 +17,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    use HasItems, HasQuests, HasStats;
+    use HasItems, HasQuests, HasStats, HasResources;
 
     /**
      * The attributes that are mass assignable.

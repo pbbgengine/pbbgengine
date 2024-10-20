@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use PbbgEngine\Attribute\AttributeServiceProvider;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Attribute\Support\ValidatedAttributes;
+use PbbgEngine\Resource\ResourceServiceProvider;
 use PbbgEngine\Stat\Models\Stats;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\StatServiceProvider;
@@ -16,13 +17,14 @@ use Workbench\App\Game\Stat\Validators\Health;
 use Workbench\App\Models\User;
 use Workbench\Database\Factories\UserFactory;
 
-class StatTest extends TestCase
+class AttributeTest extends TestCase
 {
     protected function getPackageProviders($app): array
     {
         return [
             AttributeServiceProvider::class,
             StatServiceProvider::class,
+            ResourceServiceProvider::class,
         ];
     }
 
@@ -145,5 +147,38 @@ class StatTest extends TestCase
             // @phpstan-ignore-next-line
             $user->stats; // triggers the observer
         }, InvalidAttributeHandler::class);
+    }
+
+    public function testCanGetStatsAndResources(): void
+    {
+        $user = UserFactory::new()->create();
+        $this->assertInstanceOf(User::class, $user);
+
+        $this->assertFalse($user->stats()->exists());
+        $this->assertFalse($user->resources()->exists());
+
+        $this->assertInstanceOf(ValidatedAttributes::class, $user->stats);
+        $this->assertInstanceOf(ValidatedAttributes::class, $user->resources);
+
+        $this->assertTrue($user->stats()->exists());
+        $this->assertTrue($user->resources()->exists());
+
+        $this->assertEquals([], $user->stats->toArray());
+        $this->assertEquals([], $user->resources->toArray());
+
+        $user->stats->put('energy', 10);
+        $user->resources->put('money', 1000);
+
+        $this->assertEquals(['energy' => 10], $user->stats->toArray());
+        $this->assertEquals(['money' => 1000], $user->resources->toArray());
+
+        $user->save();
+        $user->refresh();
+
+        $this->assertInstanceOf(ValidatedAttributes::class, $user->stats);
+        $this->assertInstanceOf(ValidatedAttributes::class, $user->resources);
+
+        $this->assertEquals(['energy' => 10], $user->stats->toArray());
+        $this->assertEquals(['money' => 1000], $user->resources->toArray());
     }
 }

@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace PbbgEngine\Stat;
+namespace PbbgEngine\Resource;
 
 use Illuminate\Support\ServiceProvider;
 use PbbgEngine\Attribute\AttributeManager;
 use PbbgEngine\Attribute\Observers\AttributeObserver;
+use PbbgEngine\Resource\Models\Resources;
 use PbbgEngine\Stat\Models\Stats;
 
-class StatServiceProvider extends ServiceProvider
+class ResourceServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
@@ -20,8 +21,8 @@ class StatServiceProvider extends ServiceProvider
 
         // todo: make this configurable
         $manager = app(AttributeManager::class);
-        $manager->types['stats'] = StatService::class;
-        Stats::observe(AttributeObserver::class);
+        $manager->types['resources'] = ResourceService::class;
+        Resources::observe(AttributeObserver::class);
     }
 
     /**
@@ -29,7 +30,7 @@ class StatServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(StatService::class);
+        $this->app->singleton(ResourceService::class);
     }
 
     /**
@@ -40,7 +41,7 @@ class StatServiceProvider extends ServiceProvider
         $timestamp = date('Y_m_d_His');
 
         $this->publishes([
-            __DIR__ . '/../../database/migrations/create_stats_table.php' => $this->app->databasePath("migrations/{$timestamp}_create_stats_table.php")
+            __DIR__ . '/../../database/migrations/create_resources_table.php' => $this->app->databasePath("migrations/{$timestamp}_create_resources_table.php")
         ]);
     }
 }
