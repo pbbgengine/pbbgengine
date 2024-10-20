@@ -6,6 +6,8 @@ namespace PbbgEngine\Stat;
 
 use Illuminate\Support\ServiceProvider;
 use PbbgEngine\Attribute\AttributeManager;
+use PbbgEngine\Attribute\Observers\AttributeObserver;
+use PbbgEngine\Stat\Models\Stats;
 
 class StatServiceProvider extends ServiceProvider
 {
@@ -15,6 +17,9 @@ class StatServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishMigrations();
+
+        // todo: automate this
+        Stats::observe(AttributeObserver::class);
     }
 
     /**

@@ -47,6 +47,7 @@ class ValidatedAttributes extends Collection
      */
     public function offsetSet($key, $value): void
     {
+        // todo: get correct service from attribute manager
         $service = app(StatService::class);
         if (isset($this->model) && isset($service->handlers[$this->model::class][$key])) {
             if (!is_subclass_of($service->handlers[$this->model::class][$key], $service->handler)) {
