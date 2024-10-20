@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PbbgEngine\Stat\Support;
+namespace PbbgEngine\Attribute\Support;
 
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
@@ -10,13 +10,13 @@ use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Database\Eloquent\Model;
 use PbbgEngine\Stat\Models\Stats;
 
-class AsValidatedCollection implements Castable
+class AsValidatedAttributes implements Castable
 {
     /**
      * Get the caster class to use when casting from / to this cast target.
      *
      * @param  array<int, mixed>  $arguments
-     * @return CastsAttributes<ValidatedCollection<string, mixed>, iterable<string, mixed>>
+     * @return CastsAttributes<ValidatedAttributes<string, mixed>, iterable<string, mixed>>
      */
     public static function castUsing(array $arguments)
     {
@@ -27,7 +27,7 @@ class AsValidatedCollection implements Castable
             /**
              * @param Stats $model
              * @param array<string, mixed> $attributes
-             * @return ValidatedCollection<array-key, mixed>|null
+             * @return ValidatedAttributes<array-key, mixed>|null
              */
             public function get(Model $model, string $key, mixed $value, array $attributes)
             {
@@ -41,7 +41,7 @@ class AsValidatedCollection implements Castable
                     return null;
                 }
 
-                return ValidatedCollection::withModel($model->model, $data);
+                return ValidatedAttributes::withModel($model->model, $data);
             }
 
             /**

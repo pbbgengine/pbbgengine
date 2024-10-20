@@ -101,7 +101,7 @@ trait HasDynamicAttributes
     {
         if (isset($this->relations[$relation])) {
             $this->relations[$relation]->save();
+            unset($this->attributes[$relation]);
         }
-        unset($this->attributes[$relation]);
     }
 }

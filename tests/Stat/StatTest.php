@@ -7,10 +7,10 @@ namespace PbbgEngine\Tests\Stat;
 use Illuminate\Support\Collection;
 use PbbgEngine\Attribute\AttributeServiceProvider;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
+use PbbgEngine\Attribute\Support\ValidatedAttributes;
 use PbbgEngine\Stat\Models\Stats;
 use PbbgEngine\Stat\StatService;
 use PbbgEngine\Stat\StatServiceProvider;
-use PbbgEngine\Stat\Support\ValidatedCollection;
 use PbbgEngine\Tests\TestCase;
 use Workbench\App\Game\Stat\Validators\Health;
 use Workbench\App\Models\User;
@@ -81,7 +81,7 @@ class StatTest extends TestCase
 
         $this->assertFalse(Stats::query()->exists());
 
-        $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
+        $this->assertInstanceOf(ValidatedAttributes::class, $user->stats);
 
         $this->assertTrue(Stats::query()->exists());
 
@@ -107,7 +107,7 @@ class StatTest extends TestCase
 
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
-        $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
+        $this->assertInstanceOf(ValidatedAttributes::class, $user->stats);
         $this->assertEquals([], $user->stats->toArray());
 
         $statService->handlers[$user::class] = ['health' => Health::class];
@@ -127,7 +127,7 @@ class StatTest extends TestCase
         $this->assertCount(0, $service->booted);
 
         $user = UserFactory::new()->createOne();
-        $this->assertInstanceOf(ValidatedCollection::class, $user->stats);
+        $this->assertInstanceOf(ValidatedAttributes::class, $user->stats);
 
         $this->assertCount(1, $service->booted);
     }

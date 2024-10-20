@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PbbgEngine\Stat\Support;
+namespace PbbgEngine\Attribute\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -14,17 +14,17 @@ use PbbgEngine\Stat\StatService;
  * @template TValue
  * @extends Collection<TKey, TValue>
  */
-class ValidatedCollection extends Collection
+class ValidatedAttributes extends Collection
 {
     public Model $model;
 
     /**
-     * Creates a ValidatedCollection instance with the
+     * Creates a ValidatedAttributes instance with the
      * model type to validate the stats against.
      *
      * @param Model $model
      * @param array<int|string, mixed> $items
-     * @return ValidatedCollection<int|string, mixed>
+     * @return ValidatedAttributes<int|string, mixed>
      */
     public static function withModel(Model $model, array $items = []): self
     {

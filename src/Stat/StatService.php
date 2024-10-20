@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace PbbgEngine\Stat;
 
 use PbbgEngine\Attribute\AttributeService;
-use PbbgEngine\Stat\Observers\StatsProxyObserver;
+use PbbgEngine\Attribute\Observers\AttributeProxyObserver;
 use PbbgEngine\Stat\Validators\Validator;
 
 /**
- * @extends AttributeService<Validator, StatsProxyObserver>
+ * @extends AttributeService<Validator, AttributeProxyObserver>
  */
 class StatService extends AttributeService
 {
@@ -23,7 +23,7 @@ class StatService extends AttributeService
     /**
      * The stat observer to use.
      *
-     * @var class-string<StatsProxyObserver>
+     * @var class-string<AttributeProxyObserver>
      */
-    public string $observer = StatsProxyObserver::class;
+    public string $observer = AttributeProxyObserver::class;
 }

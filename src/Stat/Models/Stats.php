@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
+use PbbgEngine\Attribute\Support\AsValidatedAttributes;
 use PbbgEngine\Stat\StatService;
-use PbbgEngine\Stat\Support\AsValidatedCollection;
 
 /**
  * @property int $id
@@ -26,7 +26,7 @@ class Stats extends Model
     ];
 
     protected $casts = [
-        'stats' => AsValidatedCollection::class,
+        'stats' => AsValidatedAttributes::class,
     ];
 
     /**
