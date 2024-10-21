@@ -16,12 +16,11 @@ return new class extends Migration
         Schema::create('attributes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('model_type');
-            $table->unsignedBigInteger('model_id');
+            $table->morphs('model');
             $table->json('attribute')->nullable();
             $table->timestamps();
 
-            $table->index(['name', 'model_type', 'model_id'], 'attribute_name_model_index');
+            $table->index(['name', 'model_type', 'model_id']);
         });
     }
 

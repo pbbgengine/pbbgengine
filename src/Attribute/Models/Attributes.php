@@ -7,11 +7,14 @@ namespace PbbgEngine\Attribute\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use PbbgEngine\Attribute\Support\AsValidatedAttributes;
+use PbbgEngine\Attribute\Support\ValidatedAttributes;
 
 /**
  * @property int $id
+ * @property string $name
  * @property string $model_type
  * @property int $model_id
+ * @property ValidatedAttributes $attribute
  */
 class Attributes extends Model
 {

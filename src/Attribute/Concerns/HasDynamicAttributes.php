@@ -10,6 +10,7 @@ use PbbgEngine\Attribute\AttributeManager;
 use PbbgEngine\Attribute\AttributeService;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeService;
+use PbbgEngine\Attribute\Models\Attributes;
 use PbbgEngine\Attribute\Validators\Validator;
 
 /**
@@ -84,7 +85,7 @@ trait HasDynamicAttributes
                 $this->unsetRelation($relation);
                 $this->load($relation);
 
-                /** @var Model $instance */
+                /** @var Attributes $instance */
                 $instance = $this->relations[$relation];
                 $this->attributes[$relation] = $instance->attribute;
             }
