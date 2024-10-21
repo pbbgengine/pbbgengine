@@ -7,7 +7,7 @@ namespace PbbgEngine\Stat\Concerns;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use PbbgEngine\Attribute\Concerns\HasDynamicAttributes;
-use PbbgEngine\Stat\Models\Stats;
+use PbbgEngine\Attribute\Models\Attributes;
 
 /**
  * @mixin Model
@@ -19,11 +19,12 @@ trait HasStats
     /**
      * Get the stats relation for the model.
      *
-     * @return HasOne<Stats>
+     * @return HasOne<Attributes>
      */
     public function stats(): HasOne
     {
-        return $this->hasOne(Stats::class, 'model_id', $this->primaryKey)
+        return $this->hasOne(Attributes::class, 'model_id', $this->primaryKey)
+            ->where('name', 'stats')
             ->where('model_type', self::class);
     }
 }

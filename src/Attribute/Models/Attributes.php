@@ -6,6 +6,7 @@ namespace PbbgEngine\Attribute\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use PbbgEngine\Attribute\Support\AsValidatedAttributes;
 
 /**
  * @property int $id
@@ -14,6 +15,17 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Attributes extends Model
 {
+    protected $fillable = [
+        'name',
+        'model_type',
+        'model_id',
+        'attribute',
+    ];
+
+    protected $casts = [
+        'attribute' => AsValidatedAttributes::class,
+    ];
+
     /**
      * Get the model that the attributes belong to.
      *

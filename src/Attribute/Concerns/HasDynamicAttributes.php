@@ -59,7 +59,7 @@ trait HasDynamicAttributes
                 $this->load($relation);
             }
 
-            $this->attributes[$relation] = $this->relations[$relation]?->{$relation};
+            $this->attributes[$relation] = $this->relations[$relation]?->attribute;
 
             if ($this->attributes[$relation] === null) {
                 $data = [];
@@ -75,9 +75,10 @@ trait HasDynamicAttributes
                 }
 
                 $this->{$relation}()->create([
+                    'name' => $relation,
                     'model_type' => self::class,
                     'model_id' => $this->{$this->primaryKey},
-                    $relation => $data,
+                    'attribute' => $data,
                 ]);
 
                 $this->unsetRelation($relation);
@@ -85,7 +86,7 @@ trait HasDynamicAttributes
 
                 /** @var Model $instance */
                 $instance = $this->relations[$relation];
-                $this->attributes[$relation] = $instance->{$relation};
+                $this->attributes[$relation] = $instance->attribute;
             }
         }
 

@@ -7,6 +7,7 @@ namespace PbbgEngine\Tests\Stat;
 use Illuminate\Support\Collection;
 use PbbgEngine\Attribute\AttributeServiceProvider;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
+use PbbgEngine\Attribute\Models\Attributes;
 use PbbgEngine\Attribute\Support\ValidatedAttributes;
 use PbbgEngine\Resource\ResourceServiceProvider;
 use PbbgEngine\Stat\Models\Stats;
@@ -33,11 +34,11 @@ class AttributeTest extends TestCase
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
 
-        $this->assertFalse(Stats::query()->exists());
+        $this->assertFalse(Attributes::query()->exists());
 
         $this->assertInstanceOf(Collection::class, $user->stats);
 
-        $this->assertTrue(Stats::query()->exists());
+        $this->assertTrue(Attributes::query()->exists());
 
         $this->assertEquals([], $user->stats->toArray());
         $user->stats->put('test', 123);
@@ -45,30 +46,31 @@ class AttributeTest extends TestCase
 
         $user->save();
 
-        $statInstance = Stats::query()
+        $statInstance = Attributes::query()
+            ->where('name', 'stats')
             ->where('model_type', $user::class)
             ->where('model_id', $user->id)
             ->first();
 
         $this->assertNotNull($statInstance);
-        $this->assertEquals($statInstance->stats->toArray(), $user->stats->toArray());
+        $this->assertEquals($statInstance->attribute->toArray(), $user->stats->toArray());
 
-        $statInstance->stats = $statInstance->stats->map(fn ($item) => $item + 1);
-        $this->assertEquals(['test' => 124], $statInstance->stats->toArray());
+        $statInstance->attribute = $statInstance->attribute->map(fn ($item) => $item + 1);
+        $this->assertEquals(['test' => 124], $statInstance->attribute->toArray());
         $statInstance->save();
 
         $user->refresh();
 
         $this->assertInstanceOf(Collection::class, $user->stats);
-        $this->assertEquals($statInstance->stats->toArray(), $user->stats->toArray());
+        $this->assertEquals($statInstance->attribute->toArray(), $user->stats->toArray());
 
         $instance = $user->whereHas('stats', function($query) {
-            $query->where('stats->test', '<', 135);
+            $query->where('attribute->test', '<', 135);
         })->first();
         $this->assertNotNull($instance);
 
         $instance = $user->whereHas('stats', function($query) {
-            $query->where('stats->test', '>', 125);
+            $query->where('attribute->test', '>', 125);
         })->first();
         $this->assertNull($instance);
     }
@@ -81,11 +83,11 @@ class AttributeTest extends TestCase
         $service = app(StatService::class);
         $service->handlers[$user::class] = ['health' => Health::class];
 
-        $this->assertFalse(Stats::query()->exists());
+        $this->assertFalse(Attributes::query()->exists());
 
         $this->assertInstanceOf(ValidatedAttributes::class, $user->stats);
 
-        $this->assertTrue(Stats::query()->exists());
+        $this->assertTrue(Attributes::query()->exists());
 
         // only health, the points stat has no class handler, therefore no default value
         $this->assertEquals(['health' => 100], $user->stats->toArray());

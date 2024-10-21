@@ -13,11 +13,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('resources', function (Blueprint $table) {
+        Schema::create('attributes', function (Blueprint $table) {
             $table->id();
-            $table->morphs('model');
-            $table->json('resources')->nullable();
+            $table->string('name');
+            $table->string('model_type');
+            $table->unsignedBigInteger('model_id');
+            $table->json('attribute')->nullable();
             $table->timestamps();
+
+            $table->index(['name', 'model_type', 'model_id'], 'attribute_name_model_index');
         });
     }
 
@@ -26,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('resources');
+        Schema::dropIfExists('attributes');
     }
 };

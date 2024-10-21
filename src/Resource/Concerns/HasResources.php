@@ -7,7 +7,7 @@ namespace PbbgEngine\Resource\Concerns;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use PbbgEngine\Attribute\Concerns\HasDynamicAttributes;
-use PbbgEngine\Resource\Models\Resources;
+use PbbgEngine\Attribute\Models\Attributes;
 
 /**
  * @mixin Model
@@ -19,11 +19,12 @@ trait HasResources
     /**
      * Get the resources relation for the model.
      *
-     * @return HasOne<Resources>
+     * @return HasOne<Attributes>
      */
     public function resources(): HasOne
     {
-        return $this->hasOne(Resources::class, 'model_id', $this->primaryKey)
+        return $this->hasOne(Attributes::class, 'model_id', $this->primaryKey)
+            ->where('name', 'resources')
             ->where('model_type', self::class);
     }
 }

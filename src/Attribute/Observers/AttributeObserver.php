@@ -13,7 +13,7 @@ class AttributeObserver
 {
     public function saving(Attributes $model): void
     {
-        $column = $model->getTable();
+        $column = $model->name;
         $manager = app(AttributeManager::class);
         $service = app($manager->types[$column]);
 
@@ -24,10 +24,10 @@ class AttributeObserver
             }
             /** @var Validator $validator */
             $validator = new $class($model->model);
-            if (!isset($model->{$column}[$stat])) {
-                $model->{$column}[$stat] = $validator->default();
+            if (!isset($model->attribute[$stat])) {
+                $model->attribute[$stat] = $validator->default();
             } else {
-                $model->{$column}[$stat] = $validator->validate($model->{$column}[$stat]);
+                $model->attribute[$stat] = $validator->validate($model->attribute[$stat]);
             }
         }
     }
