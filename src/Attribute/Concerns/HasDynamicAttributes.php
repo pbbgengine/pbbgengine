@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PbbgEngine\Attribute\Concerns;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use PbbgEngine\Attribute\AttributeManager;
 use PbbgEngine\Attribute\AttributeService;
@@ -19,6 +20,27 @@ use PbbgEngine\Attribute\Validators\Validator;
 trait HasDynamicAttributes
 {
     /**
+     * Handle dynamic method calls to create attribute relations.
+     *
+     * @param string $method
+     * @param array<int, mixed> $parameters
+     * @return HasOne<Attributes>|mixed
+     */
+    public function __call($method, $parameters): mixed
+    {
+        $manager = app(AttributeManager::class);
+        if (in_array($method, array_keys($manager->types))) {
+            return $this->hasOne(Attributes::class, 'model_id', $this->primaryKey)
+                ->where('name', $method)
+                ->where('model_type', self::class);
+        }
+
+        return parent::__call($method, $parameters);
+    }
+
+    /**
+     * Dynamically retrieve the related model's attributes by relation.
+     *
      * @param $key
      * @return mixed
      * @throws InvalidAttributeHandler|InvalidAttributeService
@@ -26,7 +48,7 @@ trait HasDynamicAttributes
     public function __get($key): mixed
     {
         $manager = app(AttributeManager::class);
-        if (isset($manager->types[$key]) && method_exists($this, $key)) {
+        if (in_array($key, array_keys($manager->types))) {
             return $this->getDynamicAttribute($key);
         }
 

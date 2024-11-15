@@ -4,20 +4,28 @@ namespace Workbench\App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
+use PbbgEngine\Attribute\Concerns\HasDynamicAttributes;
+use PbbgEngine\Attribute\Models\Attributes;
 use PbbgEngine\Item\Concerns\HasItems;
 use PbbgEngine\Quest\Concerns\HasQuests;
-use PbbgEngine\Resource\Concerns\HasResources;
-use PbbgEngine\Stat\Concerns\HasStats;
 use Workbench\Database\Factories\UserFactory;
 
+/**
+ * @property Collection $stats
+ * @property Collection $resources
+ * @method HasOne<Attributes> stats()
+ * @method HasOne<Attributes> resources()
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    use HasItems, HasQuests, HasStats, HasResources;
+    use HasItems, HasQuests, HasDynamicAttributes;
 
     /**
      * The attributes that are mass assignable.
