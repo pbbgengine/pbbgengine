@@ -15,7 +15,7 @@ class AttributeObserver
     {
         $column = $model->name;
         $manager = app(AttributeManager::class);
-        $service = app($manager->types[$column]);
+        $service = $manager->types[$column];
 
         $stats = $service->handlers[$model->model_type] ?? [];
         foreach ($stats as $stat => $class) {

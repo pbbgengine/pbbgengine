@@ -9,7 +9,7 @@ class AttributeManager
     /**
      * The services that handle each type of attribute.
      *
-     * @var array<string, class-string>
+     * @var array<string, AttributeService>
      */
     public array $types = [];
 }

@@ -54,7 +54,7 @@ class ValidatedAttributes extends Collection
     {
         $manager = app(AttributeManager::class);
         /** @var AttributeService $service */
-        $service = app($manager->types[$this->attributes->name]);
+        $service = $manager->types[$this->attributes->name];
         if (isset($this->model) && isset($service->handlers[$this->model::class][$key])) {
             if (!is_subclass_of($service->handlers[$this->model::class][$key], $service->handler)) {
                 throw new InvalidAttributeHandler($service->handlers[$this->model::class][$key]);

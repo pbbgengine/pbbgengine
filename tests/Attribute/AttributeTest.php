@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace PbbgEngine\Tests\Stat;
 
 use Illuminate\Support\Collection;
+use PbbgEngine\Attribute\AttributeManager;
+use PbbgEngine\Attribute\AttributeService;
 use PbbgEngine\Attribute\AttributeServiceProvider;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Attribute\Models\Attributes;
@@ -22,11 +24,16 @@ class AttributeTest extends TestCase
 {
     protected function getPackageProviders($app): array
     {
-        return [
-            AttributeServiceProvider::class,
-            StatServiceProvider::class,
-            ResourceServiceProvider::class,
-        ];
+        return [AttributeServiceProvider::class];
+    }
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $manager = app(AttributeManager::class);
+        $manager->types['resources'] = new AttributeService();
+        $manager->types['stats'] = new AttributeService();
     }
 
     public function testCanGetStats(): void
@@ -80,7 +87,7 @@ class AttributeTest extends TestCase
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
 
-        $service = app(StatService::class);
+        $service = app(AttributeManager::class)->types['stats'];
         $service->handlers[$user::class] = ['health' => Health::class];
 
         $this->assertFalse(Attributes::query()->exists());
@@ -106,16 +113,16 @@ class AttributeTest extends TestCase
 
     public function testStatServicePopulated(): void
     {
-        $statService = app(StatService::class);
-        $this->assertCount(0, $statService->handlers);
+        $service = app(AttributeManager::class)->types['stats'];
+        $this->assertCount(0, $service->handlers);
 
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
         $this->assertInstanceOf(ValidatedAttributes::class, $user->stats);
         $this->assertEquals([], $user->stats->toArray());
 
-        $statService->handlers[$user::class] = ['health' => Health::class];
-        $this->assertCount(1, $statService->handlers[$user::class]);
+        $service->handlers[$user::class] = ['health' => Health::class];
+        $this->assertCount(1, $service->handlers[$user::class]);
         $this->assertNotNull($this);
 
         $user->save();
@@ -125,8 +132,7 @@ class AttributeTest extends TestCase
 
     public function testObserverGetsBooted(): void
     {
-        /** @var StatService $service */
-        $service = app(StatService::class);
+        $service = app(AttributeManager::class)->types['stats'];
 
         $this->assertCount(0, $service->booted);
 
@@ -143,7 +149,7 @@ class AttributeTest extends TestCase
 
 
         $this->assertThrows(function() use ($user) {
-            $service = app(StatService::class);
+            $service = app(AttributeManager::class)->types['stats'];
             // @phpstan-ignore-next-line
             $service->handlers[$user::class] = ['energy' => 'invalid'];
             // @phpstan-ignore-next-line

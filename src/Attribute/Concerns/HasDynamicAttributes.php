@@ -70,8 +70,7 @@ trait HasDynamicAttributes
             throw new InvalidAttributeService($this::class);
         }
 
-        /** @var AttributeService $service */
-        $service = app($manager->types[$relation]);
+        $service = $manager->types[$relation];
 
         if (!in_array(self::class, $service->booted)) {
             $service->bootObserver($this);
