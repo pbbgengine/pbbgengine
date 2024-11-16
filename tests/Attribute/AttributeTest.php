@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace PbbgEngine\Tests\Attribute;
 
 use Illuminate\Support\Collection;
-use PbbgEngine\Attribute\AttributeManager;
+use PbbgEngine\Attribute\AttributeRegistry;
+use PbbgEngine\Attribute\AttributeTypeHandler;
 use PbbgEngine\Attribute\AttributeServiceProvider;
-use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
+use PbbgEngine\Attribute\Exceptions\InvalidAttributeValidator;
 use PbbgEngine\Attribute\Models\Attributes;
 use PbbgEngine\Attribute\Support\ValidatedAttributes;
 use PbbgEngine\Tests\TestCase;
@@ -26,9 +27,10 @@ class AttributeTest extends TestCase
     {
         parent::setUp();
 
-        $manager = app(AttributeManager::class);
-        $manager->add('stats');
-        $manager->add('resources');
+        /** @var AttributeRegistry $registry */
+        $registry = app(AttributeRegistry::class);
+        $registry->registerType('stats');
+        $registry->registerType('resources');
     }
 
     public function testCanGetStats(): void
@@ -82,8 +84,9 @@ class AttributeTest extends TestCase
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
 
-        $service = app(AttributeManager::class)->types['stats'];
-        $service->handlers[$user::class] = ['health' => Health::class];
+        $service = app(AttributeRegistry::class)->handlers['stats'];
+        $this->assertInstanceOf(AttributeTypeHandler::class, $service);
+        $service->bindValidator($user::class, 'health', Health::class);
 
         $this->assertFalse(Attributes::query()->exists());
 
@@ -108,16 +111,16 @@ class AttributeTest extends TestCase
 
     public function testStatServicePopulated(): void
     {
-        $service = app(AttributeManager::class)->types['stats'];
-        $this->assertCount(0, $service->handlers);
+        $service = app(AttributeRegistry::class)->handlers['stats'];
+        $this->assertCount(0, $service->validators);
 
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
         $this->assertInstanceOf(ValidatedAttributes::class, $user->stats);
         $this->assertEquals([], $user->stats->toArray());
 
-        $service->handlers[$user::class] = ['health' => Health::class];
-        $this->assertCount(1, $service->handlers[$user::class]);
+        $service->validators[$user::class] = ['health' => Health::class];
+        $this->assertCount(1, $service->validators[$user::class]);
         $this->assertNotNull($this);
 
         $user->save();
@@ -127,7 +130,7 @@ class AttributeTest extends TestCase
 
     public function testObserverGetsBooted(): void
     {
-        $service = app(AttributeManager::class)->types['stats'];
+        $service = app(AttributeRegistry::class)->handlers['stats'];
 
         $this->assertCount(0, $service->booted);
 
@@ -142,14 +145,13 @@ class AttributeTest extends TestCase
         $user = UserFactory::new()->create();
         $this->assertInstanceOf(User::class, $user);
 
-
         $this->assertThrows(function() use ($user) {
-            $service = app(AttributeManager::class)->types['stats'];
+            $service = app(AttributeRegistry::class)->handlers['stats'];
             // @phpstan-ignore-next-line
-            $service->handlers[$user::class] = ['energy' => 'invalid'];
+            $service->validators[$user::class] = ['energy' => 'invalid'];
             // @phpstan-ignore-next-line
             $user->stats; // triggers the observer
-        }, InvalidAttributeHandler::class);
+        }, InvalidAttributeValidator::class);
     }
 
     public function testCanGetStatsAndResources(): void

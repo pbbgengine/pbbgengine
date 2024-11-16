@@ -6,10 +6,10 @@ namespace PbbgEngine\Attribute\Exceptions;
 
 use Exception;
 
-class InvalidAttributeHandler extends Exception
+class InvalidAttributeTypeHandler extends Exception
 {
     public function __construct(string $class)
     {
-        parent::__construct("invalid attribute validator: $class");
+        parent::__construct("invalid attribute type handler: $class");
     }
 }

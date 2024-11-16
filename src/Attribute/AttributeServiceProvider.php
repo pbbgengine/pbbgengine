@@ -25,7 +25,7 @@ class AttributeServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(AttributeManager::class);
+        $this->app->singleton(AttributeRegistry::class);
     }
 
     /**

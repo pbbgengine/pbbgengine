@@ -6,9 +6,9 @@ namespace PbbgEngine\Attribute\Support;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use PbbgEngine\Attribute\AttributeManager;
-use PbbgEngine\Attribute\AttributeService;
-use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
+use PbbgEngine\Attribute\AttributeRegistry;
+use PbbgEngine\Attribute\AttributeTypeHandler;
+use PbbgEngine\Attribute\Exceptions\InvalidAttributeValidator;
 use PbbgEngine\Attribute\Models\Attributes;
 
 /**
@@ -37,28 +37,23 @@ class ValidatedAttributes extends Collection
         return $instance;
     }
 
-    public function __construct($items = [])
-    {
-        parent::__construct($items);
-    }
-
     /**
      * Performs validation on the value before setting it in the collection.
      *
      * @param TKey $key
      * @param TValue $value
-     * @throws InvalidAttributeHandler
+     * @throws InvalidAttributeValidator
      */
     public function offsetSet($key, $value): void
     {
-        $manager = app(AttributeManager::class);
-        /** @var AttributeService $service */
-        $service = $manager->types[$this->attributes->name];
-        if (isset($this->model) && isset($service->handlers[$this->model::class][$key])) {
-            if (!is_subclass_of($service->handlers[$this->model::class][$key], $service->handler)) {
-                throw new InvalidAttributeHandler($service->handlers[$this->model::class][$key]);
+        $registry = app(AttributeRegistry::class);
+        /** @var AttributeTypeHandler $service */
+        $service = $registry->handlers[$this->attributes->name];
+        if (isset($this->model) && isset($service->validators[$this->model::class][$key])) {
+            if (!is_subclass_of($service->validators[$this->model::class][$key], $service->validator)) {
+                throw new InvalidAttributeValidator($service->validators[$this->model::class][$key]);
             }
-            $validator = new $service->handlers[$this->model::class][$key]($this->model);
+            $validator = new $service->validators[$this->model::class][$key]($this->model);
             $value = $validator->validate($value);
         }
 

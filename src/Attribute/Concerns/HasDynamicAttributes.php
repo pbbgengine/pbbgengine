@@ -7,9 +7,9 @@ namespace PbbgEngine\Attribute\Concerns;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
-use PbbgEngine\Attribute\AttributeManager;
-use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
-use PbbgEngine\Attribute\Exceptions\InvalidAttributeService;
+use PbbgEngine\Attribute\AttributeRegistry;
+use PbbgEngine\Attribute\Exceptions\InvalidAttributeValidator;
+use PbbgEngine\Attribute\Exceptions\InvalidAttributeTypeHandler;
 use PbbgEngine\Attribute\Models\Attributes;
 use PbbgEngine\Attribute\Validators\Validator;
 
@@ -27,8 +27,8 @@ trait HasDynamicAttributes
      */
     public function __call($method, $parameters): mixed
     {
-        $manager = app(AttributeManager::class);
-        if (in_array($method, array_keys($manager->types))) {
+        $registry = app(AttributeRegistry::class);
+        if (in_array($method, array_keys($registry->handlers))) {
             return $this->hasOne(Attributes::class, 'model_id', $this->primaryKey)
                 ->where('name', $method)
                 ->where('model_type', self::class);
@@ -42,12 +42,12 @@ trait HasDynamicAttributes
      *
      * @param $key
      * @return mixed
-     * @throws InvalidAttributeHandler|InvalidAttributeService
+     * @throws InvalidAttributeValidator|InvalidAttributeTypeHandler
      */
     public function __get($key): mixed
     {
-        $manager = app(AttributeManager::class);
-        if (in_array($key, array_keys($manager->types))) {
+        $registry = app(AttributeRegistry::class);
+        if (in_array($key, array_keys($registry->handlers))) {
             return $this->getDynamicAttribute($key);
         }
 
@@ -59,17 +59,17 @@ trait HasDynamicAttributes
      *
      * @param string $relation
      * @return Collection<string, mixed|null>
-     * @throws InvalidAttributeHandler|InvalidAttributeService
+     * @throws InvalidAttributeValidator|InvalidAttributeTypeHandler
      */
     public function getDynamicAttribute(string $relation): Collection
     {
-        $manager = app(AttributeManager::class);
+        $registry = app(AttributeRegistry::class);
 
-        if (!isset($manager->types[$relation])) {
-            throw new InvalidAttributeService($this::class);
+        if (!isset($registry->handlers[$relation])) {
+            throw new InvalidAttributeTypeHandler($this::class);
         }
 
-        $service = $manager->types[$relation];
+        $service = $registry->handlers[$relation];
 
         if (!in_array(self::class, $service->booted)) {
             $service->bootObserver($this);
@@ -84,11 +84,11 @@ trait HasDynamicAttributes
 
             if ($this->attributes[$relation] === null) {
                 $data = [];
-                $defaultValues = $service->handlers[$this::class] ?? [];
+                $defaultValues = $service->validators[$this::class] ?? [];
 
                 foreach ($defaultValues as $stat => $class) {
-                    if (!is_subclass_of($class, $service->handler)) {
-                        throw new InvalidAttributeHandler($class);
+                    if (!is_subclass_of($class, $service->validator)) {
+                        throw new InvalidAttributeValidator($class);
                     }
                     /** @var Validator $validator */
                     $validator = new $class($this);
@@ -115,7 +115,7 @@ trait HasDynamicAttributes
     }
 
     /**
-     * Save the dynamically retrieved relation data
+     * Save the dynamically retrieved relation data.
      *
      * @param string $relation
      */

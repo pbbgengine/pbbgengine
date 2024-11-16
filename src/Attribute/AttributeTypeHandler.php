@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace PbbgEngine\Attribute;
 
 use Illuminate\Database\Eloquent\Model;
+use PbbgEngine\Attribute\Exceptions\InvalidAttributeValidator;
 use PbbgEngine\Attribute\Observers\AttributeProxyObserver;
 use PbbgEngine\Attribute\Validators\Validator;
 
-class AttributeService
+class AttributeTypeHandler
 {
     /**
-     * The attributes applied to each model.
+     * The validators for each attribute mapped by model type.
      *
      * e.g. [User::class => ['health' => HealthValidator::class]]
      *
-     * @var array<class-string<Model>, array<string, class-string<Validator>>> $handlers
+     * @var array<class-string<Model>, array<string, class-string<Validator>>> $validators
      */
-    public array $handlers = [];
+    public array $validators = [];
 
     /**
      * The models that have had their attribute observers booted.
@@ -27,11 +28,11 @@ class AttributeService
     public array $booted = [];
 
     /**
-     * The class or interface that the attribute handlers must implement.
+     * The base class that validators must implement.
      *
      * @var class-string<Validator>
      */
-    public string $handler = Validator::class;
+    public string $validator = Validator::class;
 
     /**
      * The class name of the attribute observer.
@@ -49,4 +50,25 @@ class AttributeService
         $model::observe($this->observer);
         $this->booted[] = $model::class;
     }
+
+    /**
+     * Binds a validator to a model and attribute.
+     *
+     * @param class-string<Model> $model
+     * @param class-string<Validator> $validator
+     * @throws InvalidAttributeValidator
+     */
+    public function bindValidator(string $model, string $attribute, string $validator): void
+    {
+        if (!is_subclass_of($validator, $this->validator)) {
+            throw new InvalidAttributeValidator($validator);
+        }
+
+        if (!isset($this->validators[$model])) {
+            $this->validators[$model] = [];
+        }
+
+        $this->validators[$model][$attribute] = $validator;
+    }
+
 }

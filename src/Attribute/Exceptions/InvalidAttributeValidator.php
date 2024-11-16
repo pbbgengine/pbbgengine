@@ -6,10 +6,10 @@ namespace PbbgEngine\Attribute\Exceptions;
 
 use Exception;
 
-class InvalidAttributeService extends Exception
+class InvalidAttributeValidator extends Exception
 {
     public function __construct(string $class)
     {
-        parent::__construct("missing attribute service: $class");
+        parent::__construct("invalid attribute validator: $class");
     }
 }
