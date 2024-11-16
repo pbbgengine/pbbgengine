@@ -2,19 +2,14 @@
 
 declare(strict_types=1);
 
-namespace PbbgEngine\Tests\Stat;
+namespace PbbgEngine\Tests\Attribute;
 
 use Illuminate\Support\Collection;
 use PbbgEngine\Attribute\AttributeManager;
-use PbbgEngine\Attribute\AttributeService;
 use PbbgEngine\Attribute\AttributeServiceProvider;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Attribute\Models\Attributes;
 use PbbgEngine\Attribute\Support\ValidatedAttributes;
-use PbbgEngine\Resource\ResourceServiceProvider;
-use PbbgEngine\Stat\Models\Stats;
-use PbbgEngine\Stat\StatService;
-use PbbgEngine\Stat\StatServiceProvider;
 use PbbgEngine\Tests\TestCase;
 use Workbench\App\Game\Stat\Validators\Health;
 use Workbench\App\Models\User;
@@ -32,8 +27,8 @@ class AttributeTest extends TestCase
         parent::setUp();
 
         $manager = app(AttributeManager::class);
-        $manager->types['resources'] = new AttributeService();
-        $manager->types['stats'] = new AttributeService();
+        $manager->add('stats');
+        $manager->add('resources');
     }
 
     public function testCanGetStats(): void

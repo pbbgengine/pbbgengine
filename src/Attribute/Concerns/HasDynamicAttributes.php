@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use PbbgEngine\Attribute\AttributeManager;
-use PbbgEngine\Attribute\AttributeService;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeHandler;
 use PbbgEngine\Attribute\Exceptions\InvalidAttributeService;
 use PbbgEngine\Attribute\Models\Attributes;

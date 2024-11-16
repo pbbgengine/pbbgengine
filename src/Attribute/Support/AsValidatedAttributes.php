@@ -18,18 +18,16 @@ class AsValidatedAttributes implements Castable
      * @param  array<int, mixed>  $arguments
      * @return CastsAttributes<ValidatedAttributes<string, mixed>, iterable<string, mixed>>
      */
-    public static function castUsing(array $arguments)
+    public static function castUsing(array $arguments): CastsAttributes
     {
         return new class() implements CastsAttributes
         {
-            public function __construct() {}
-
             /**
              * @param Attributes $model
              * @param array<string, mixed> $attributes
              * @return ValidatedAttributes<array-key, mixed>|null
              */
-            public function get(Model $model, string $key, mixed $value, array $attributes)
+            public function get(Model $model, string $key, mixed $value, array $attributes): ?ValidatedAttributes
             {
                 if (! isset($attributes[$key])) {
                     return null;
@@ -49,21 +47,10 @@ class AsValidatedAttributes implements Castable
              * @param array<string, mixed> $attributes
              * @return array<string, mixed>
              */
-            public function set(Model $model, string $key, mixed $value, array $attributes)
+            public function set(Model $model, string $key, mixed $value, array $attributes): array
             {
                 return [$key => Json::encode($value)];
             }
         };
-    }
-
-    /**
-     * Specify the collection for the cast.
-     *
-     * @param  class-string  $class
-     * @return string
-     */
-    public static function using($class)
-    {
-        return static::class.':'.$class;
     }
 }

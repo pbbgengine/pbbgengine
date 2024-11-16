@@ -18,7 +18,6 @@ class AttributeProxyObserver
             foreach (array_keys($manager->types) as $type) {
                 $model->saveDynamicRelation($type);
             }
-
         }
     }
 }

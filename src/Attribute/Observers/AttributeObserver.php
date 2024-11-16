@@ -11,6 +11,9 @@ use PbbgEngine\Attribute\Validators\Validator;
 
 class AttributeObserver
 {
+    /**
+     * @throws InvalidAttributeHandler
+     */
     public function saving(Attributes $model): void
     {
         $column = $model->name;
