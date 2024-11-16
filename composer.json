@@ -17,7 +17,7 @@
         "PbbgEngine\\Item\\ItemServiceProvider",
         "PbbgEngine\\Quest\\QuestServiceProvider",
         "PbbgEngine\\Crafting\\CraftingServiceProvider",
-        "PbbgEngine\\Stat\\StatServiceProvider"
+        "PbbgEngine\\Attribute\\AttributeServiceProvider"
       ]
     }
   },
