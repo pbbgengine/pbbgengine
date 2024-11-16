@@ -13,11 +13,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stats', function (Blueprint $table) {
+        Schema::create('attributes', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->morphs('model');
-            $table->json('stats')->nullable();
+            $table->json('attribute')->nullable();
             $table->timestamps();
+
+            $table->index(['name', 'model_type', 'model_id']);
         });
     }
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stats');
+        Schema::dropIfExists('attributes');
     }
 };

@@ -19,8 +19,8 @@
         <testsuite name="Crafting test suite">
             <directory>tests/Crafting</directory>
         </testsuite>
-        <testsuite name="Stat test suite">
-            <directory>tests/Stat</directory>
+        <testsuite name="Attribute test suite">
+            <directory>tests/Attribute</directory>
         </testsuite>
     </testsuites>
 </phpunit>

@@ -16,7 +16,8 @@
       "providers": [
         "PbbgEngine\\Item\\ItemServiceProvider",
         "PbbgEngine\\Quest\\QuestServiceProvider",
-        "PbbgEngine\\Crafting\\CraftingServiceProvider"
+        "PbbgEngine\\Crafting\\CraftingServiceProvider",
+        "PbbgEngine\\Attribute\\AttributeServiceProvider"
       ]
     }
   },

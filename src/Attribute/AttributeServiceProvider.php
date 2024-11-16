@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace PbbgEngine\Stat;
+namespace PbbgEngine\Attribute;
 
 use Illuminate\Support\ServiceProvider;
+use PbbgEngine\Attribute\Models\Attributes;
+use PbbgEngine\Attribute\Observers\AttributeObserver;
 
-class StatServiceProvider extends ServiceProvider
+class AttributeServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap any application services.
@@ -14,6 +16,8 @@ class StatServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishMigrations();
+
+        Attributes::observe(AttributeObserver::class);
     }
 
     /**
@@ -21,7 +25,7 @@ class StatServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(StatService::class);
+        $this->app->singleton(AttributeRegistry::class);
     }
 
     /**
@@ -32,7 +36,7 @@ class StatServiceProvider extends ServiceProvider
         $timestamp = date('Y_m_d_His');
 
         $this->publishes([
-            __DIR__.'/../../database/migrations/create_stat_tables.php' => $this->app->databasePath("migrations/{$timestamp}_create_stat_tables.php")
+            __DIR__ . '/../../database/migrations/create_attributes_table.php' => $this->app->databasePath("migrations/{$timestamp}_create_attributes_table.php")
         ]);
     }
 }
